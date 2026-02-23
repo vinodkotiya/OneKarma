@@ -1,0 +1,875 @@
+# Design Document: OneKarma.AI Landing Website
+
+## Overview
+
+The OneKarma.AI Landing Website is a single-page application (SPA) built with vanilla HTML5, CSS3, and JavaScript. The design emphasizes a futuristic, dark aesthetic with neon accents, smooth animations, and glassmorphism effects. The architecture is intentionally simple—no frameworks, no build tools, no backend—making it easy to deploy as a static site on GitHub Pages and straightforward to extend with new products.
+
+The website follows a vertical scrolling structure with six main sections: Hero, Platform Vision, Products/Launchpad, Why OneKarma, Future-Ready Statement, and Footer. Each section is self-contained and uses progressive enhancement for animations and interactivity.
+
+## Architecture
+
+### High-Level Structure
+
+```
+onekarma-landing-website/
+├── index.html           # Single HTML file with semantic structure
+├── css/
+│   └── style.css        # All styles including animations
+├── js/
+│   └── main.js          # Vanilla JavaScript for interactions
+└── assets/
+    ├── icons/           # SVG icons for features and products
+    └── images/          # Any additional graphics (optional)
+```
+
+### Technology Stack
+
+- **HTML5**: Semantic markup with sections, articles, and ARIA attributes
+- **CSS3**: Flexbox, Grid, custom properties (CSS variables), keyframe animations
+- **Vanilla JavaScript**: DOM manipulation, scroll observers, smooth scrolling
+- **No frameworks**: Pure web standards for maximum simplicity and performance
+- **No build process**: Direct deployment to any static host
+
+### Design Principles
+
+1. **Mobile-first responsive design**: Start with mobile layout, enhance for larger screens
+2. **Progressive enhancement**: Core content accessible without JavaScript, animations enhance experience
+3. **Performance-first**: CSS animations over JavaScript, lazy loading for heavy effects
+4. **Accessibility**: Semantic HTML, ARIA labels, keyboard navigation, high contrast
+5. **Extensibility**: Data-driven product cards, easy to add new sections
+
+## Components and Interfaces
+
+### 1. Hero Section Component
+
+**Purpose**: Full-screen landing section with animated background, headline, and CTAs.
+
+**HTML Structure**:
+```html
+<section id="hero" class="hero-section">
+  <div class="hero-background"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">OneKarma.AI</h1>
+    <p class="hero-subtitle">A unified AI platform for intelligent work management</p>
+    <div class="hero-cta">
+      <button class="btn-primary" data-scroll-to="platform-vision">Explore Platform</button>
+      <button class="btn-secondary" data-scroll-to="products">Coming Products</button>
+    </div>
+  </div>
+</section>
+```
+
+**CSS Approach**:
+- Full viewport height: `height: 100vh`
+- Flexbox centering for content
+- Animated background using CSS `@keyframes` for particle/grid effect
+- Glassmorphism on content container: `backdrop-filter: blur(10px)`
+- Neon glow on title: `text-shadow` with cyan/blue colors
+
+**JavaScript Behavior**:
+- Initialize background animation on page load
+- Attach smooth scroll listeners to CTA buttons
+- Optional: Intersection Observer to pause animation when out of view
+
+### 2. Platform Vision Section Component
+
+**Purpose**: Communicate OneKarma.AI's platform approach with animated cards.
+
+**HTML Structure**:
+```html
+<section id="platform-vision" class="platform-vision-section">
+  <div class="container">
+    <h2 class="section-title">One Platform. Infinite Possibilities.</h2>
+    <div class="vision-cards">
+      <article class="vision-card">
+        <h3>Built for Enterprises</h3>
+        <p>Scalable architecture designed for complex organizational needs</p>
+      </article>
+      <article class="vision-card">
+        <h3>Composable AI Services</h3>
+        <p>Mix and match AI capabilities to fit your workflow</p>
+      </article>
+      <article class="vision-card">
+        <h3>Designed for Scale, Security, and Speed</h3>
+        <p>Enterprise-grade infrastructure from day one</p>
+      </article>
+    </div>
+  </div>
+</section>
+```
+
+**CSS Approach**:
+- CSS Grid for card layout: `display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))`
+- Glassmorphism on cards: `background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px)`
+- Hover effects: `transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3)`
+- Fade-in animation on scroll
+
+**JavaScript Behavior**:
+- Intersection Observer to trigger fade-in when section enters viewport
+- Stagger animation delays for each card
+
+### 3. Products Section Component
+
+**Purpose**: Grid of product cards showcasing current and future offerings.
+
+**HTML Structure**:
+```html
+<section id="products" class="products-section">
+  <div class="container">
+    <h2 class="section-title">Product Launchpad</h2>
+    <div class="products-grid" id="products-grid">
+      <!-- Product cards dynamically generated from data -->
+    </div>
+  </div>
+</section>
+```
+
+**Product Card Structure** (generated by JavaScript):
+```html
+<article class="product-card" data-status="live">
+  <div class="product-icon">🧠</div>
+  <h3 class="product-name">Care Management AI</h3>
+  <p class="product-description">Intelligent care coordination and patient management</p>
+  <span class="product-status">Live</span>
+</article>
+```
+
+**CSS Approach**:
+- CSS Grid: `display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))`
+- Card styling: Dark background with border, glassmorphism
+- Status badge: Conditional colors (green for Live, yellow for Beta, blue for Coming Soon)
+- Hover effect: `transform: translateY(-10px) scale(1.02); box-shadow: 0 20px 40px rgba(0, 255, 255, 0.4)`
+- Glow effect: `box-shadow` with neon colors
+
+**JavaScript Behavior**:
+- Product data stored in JavaScript array:
+```javascript
+const products = [
+  { icon: '🧠', name: 'Care Management AI', description: '...', status: 'live' },
+  { icon: '🔧', name: 'JIRA AI Integration', description: '...', status: 'beta' },
+  // ... more products
+];
+```
+- Render function to generate cards from data
+- Easy to add new products by pushing to array
+
+### 4. Why OneKarma Section Component
+
+**Purpose**: Highlight key platform benefits with icons and descriptions.
+
+**HTML Structure**:
+```html
+<section id="why-onekarma" class="why-section">
+  <div class="container">
+    <h2 class="section-title">Why OneKarma.AI</h2>
+    <div class="features-grid">
+      <article class="feature-block">
+        <div class="feature-icon">
+          <svg><!-- AI icon --></svg>
+        </div>
+        <h3>AI-First Architecture</h3>
+        <p>Built from the ground up with AI at the core</p>
+      </article>
+      <!-- More feature blocks -->
+    </div>
+  </div>
+</section>
+```
+
+**CSS Approach**:
+- Flexbox or Grid for feature blocks
+- Icon styling: Neon glow effect on SVG icons
+- Fade-in animation on scroll
+- Responsive: Stack vertically on mobile
+
+**JavaScript Behavior**:
+- Intersection Observer for scroll-triggered animations
+- Stagger animation for each feature block
+
+### 5. Future-Ready Section Component
+
+**Purpose**: Bold statement about platform evolution with visual emphasis.
+
+**HTML Structure**:
+```html
+<section id="future-ready" class="future-section">
+  <div class="container">
+    <h2 class="future-statement">This platform will evolve. Your workflows will not break.</h2>
+    <div class="animated-divider"></div>
+    <div class="roadmap-hint">
+      <!-- Optional timeline visualization -->
+    </div>
+  </div>
+</section>
+```
+
+**CSS Approach**:
+- Large, bold typography for statement
+- Animated divider: CSS animation with gradient or glow effect
+- Centered layout with dramatic spacing
+
+**JavaScript Behavior**:
+- Minimal: Divider animation can be pure CSS
+
+### 6. Footer Component
+
+**Purpose**: Minimal branding and links.
+
+**HTML Structure**:
+```html
+<footer class="footer">
+  <div class="container">
+    <div class="footer-logo">OneKarma.AI</div>
+    <p class="footer-tagline">Built for the future of work</p>
+    <p class="footer-copyright">&copy; <span id="year"></span> OneKarma.AI</p>
+    <div class="footer-links">
+      <a href="#" aria-label="GitHub"><svg><!-- GitHub icon --></svg></a>
+      <a href="#" aria-label="LinkedIn"><svg><!-- LinkedIn icon --></svg></a>
+    </div>
+  </div>
+</footer>
+```
+
+**CSS Approach**:
+- Dark background, subtle border-top
+- Centered content
+- Icon links with hover glow
+
+**JavaScript Behavior**:
+- Set current year dynamically: `document.getElementById('year').textContent = new Date().getFullYear()`
+
+## Data Models
+
+### Product Data Model
+
+```javascript
+{
+  icon: String,        // Emoji or SVG identifier
+  name: String,        // Product name
+  description: String, // Short description (1-2 sentences)
+  status: String       // 'live' | 'beta' | 'coming-soon'
+}
+```
+
+**Example**:
+```javascript
+{
+  icon: '🧠',
+  name: 'Care Management AI',
+  description: 'Intelligent care coordination and patient management',
+  status: 'live'
+}
+```
+
+### Feature Data Model
+
+```javascript
+{
+  icon: String,        // SVG path or identifier
+  title: String,       // Feature title
+  description: String  // Feature description
+}
+```
+
+**Example**:
+```javascript
+{
+  icon: 'ai-icon',
+  title: 'AI-First Architecture',
+  description: 'Built from the ground up with AI at the core'
+}
+```
+
+### Color Palette (CSS Custom Properties)
+
+```css
+:root {
+  /* Base colors */
+  --color-bg-primary: #0a0a0f;
+  --color-bg-secondary: #1a1a2e;
+  --color-bg-card: rgba(26, 26, 46, 0.6);
+  
+  /* Neon accents */
+  --color-accent-cyan: #00ffff;
+  --color-accent-blue: #0080ff;
+  --color-accent-violet: #8b5cf6;
+  --color-accent-orange: #ff6b35;
+  
+  /* Text colors */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0b0;
+  
+  /* Status colors */
+  --color-status-live: #00ff88;
+  --color-status-beta: #ffaa00;
+  --color-status-coming: #0080ff;
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 2rem;
+  --spacing-lg: 4rem;
+  --spacing-xl: 6rem;
+  
+  /* Typography */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', var(--font-primary);
+}
+```
+
+## Animation Specifications
+
+### Hero Background Animation
+
+**Approach**: CSS-only particle grid animation
+
+```css
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.hero-background {
+  background: 
+    linear-gradient(90deg, var(--color-accent-cyan) 1px, transparent 1px),
+    linear-gradient(0deg, var(--color-accent-cyan) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridPulse 4s ease-in-out infinite;
+}
+```
+
+**Alternative**: JavaScript canvas animation for more complex particle effects (optional enhancement)
+
+### Scroll-Triggered Fade-In
+
+**Approach**: Intersection Observer API + CSS transitions
+
+```javascript
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -100px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+```
+
+```css
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+```
+
+### Card Hover Effects
+
+```css
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 255, 255, 0.3),
+    0 0 20px rgba(0, 255, 255, 0.2);
+}
+```
+
+### Smooth Scrolling
+
+```javascript
+document.querySelectorAll('[data-scroll-to]').forEach(button => {
+  button.addEventListener('click', (e) => {
+    const targetId = e.target.getAttribute('data-scroll-to');
+    const targetSection = document.getElementById(targetId);
+    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+```
+
+## Responsive Design Strategy
+
+### Breakpoints
+
+```css
+/* Mobile-first approach */
+/* Base styles: 320px - 767px (mobile) */
+
+@media (min-width: 768px) {
+  /* Tablet styles */
+}
+
+@media (min-width: 1024px) {
+  /* Desktop styles */
+}
+
+@media (min-width: 1440px) {
+  /* Large desktop styles */
+}
+```
+
+### Layout Adaptations
+
+**Hero Section**:
+- Mobile: Stack title and CTAs vertically, reduce font sizes
+- Desktop: Larger typography, horizontal CTA layout
+
+**Products Grid**:
+- Mobile: Single column
+- Tablet: 2 columns
+- Desktop: 3 columns
+- Large desktop: 3-4 columns
+
+**Feature Blocks**:
+- Mobile: Stack vertically
+- Tablet: 2 columns
+- Desktop: 3-5 columns in a row
+
+### Typography Scale
+
+```css
+/* Mobile */
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+p { font-size: 1rem; }
+
+/* Desktop */
+@media (min-width: 1024px) {
+  h1 { font-size: 4rem; }
+  h2 { font-size: 3rem; }
+  h3 { font-size: 1.75rem; }
+  p { font-size: 1.125rem; }
+}
+```
+
+## Accessibility Considerations
+
+### Semantic HTML
+
+- Use `<section>`, `<article>`, `<nav>`, `<footer>` appropriately
+- Heading hierarchy: Single `<h1>`, proper `<h2>` and `<h3>` nesting
+- `<button>` for interactive elements, not `<div>` with click handlers
+
+### ARIA Attributes
+
+```html
+<button aria-label="Explore Platform" data-scroll-to="platform-vision">
+  Explore Platform
+</button>
+
+<section aria-labelledby="products-heading">
+  <h2 id="products-heading">Product Launchpad</h2>
+  <!-- ... -->
+</section>
+```
+
+### Keyboard Navigation
+
+- All interactive elements focusable with Tab
+- Visible focus indicators: `outline: 2px solid var(--color-accent-cyan)`
+- Skip to content link for screen readers
+
+### Color Contrast
+
+- Text on dark backgrounds: Minimum 7:1 contrast ratio (AAA)
+- Neon accents used for decoration, not critical information
+- Status badges use both color and text labels
+
+### Reduced Motion
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+## Performance Optimization
+
+### CSS Optimization
+
+- Use CSS custom properties for theming (faster than JavaScript)
+- Prefer `transform` and `opacity` for animations (GPU-accelerated)
+- Avoid animating `width`, `height`, `top`, `left` (causes reflow)
+
+### JavaScript Optimization
+
+- Debounce scroll listeners if needed
+- Use Intersection Observer instead of scroll events
+- Minimize DOM queries: Cache element references
+
+### Asset Optimization
+
+- Use SVG for icons (scalable, small file size)
+- Inline critical CSS in `<head>`
+- Defer non-critical JavaScript: `<script defer src="main.js"></script>`
+
+### Loading Strategy
+
+1. HTML loads first (semantic content accessible immediately)
+2. CSS loads and applies (visual styling)
+3. JavaScript enhances (animations, interactions)
+4. Progressive enhancement: Site works without JavaScript
+
+## Deployment
+
+### GitHub Pages Setup
+
+1. Create repository: `onekarma-landing-website`
+2. Push code to `main` branch
+3. Enable GitHub Pages in repository settings
+4. Select source: `main` branch, root directory
+5. Access at: `https://[username].github.io/onekarma-landing-website/`
+
+### File Structure for Deployment
+
+```
+/
+├── index.html
+├── css/
+│   └── style.css
+├── js/
+│   └── main.js
+└── assets/
+    └── icons/
+        ├── ai-icon.svg
+        ├── api-icon.svg
+        └── ...
+```
+
+### No Build Process Required
+
+- All files are static and ready to serve
+- No compilation, bundling, or transpilation needed
+- Direct deployment to any static host (GitHub Pages, Netlify, Vercel, etc.)
+
+
+
+## Correctness Properties
+
+*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+
+### Property 1: Product Card Structure Completeness
+
+*For any* product card rendered in the Products Section, the card must display three required elements: product name, product description, and status badge.
+
+**Validates: Requirements 3.3**
+
+### Property 2: Product Card Hover Effects
+
+*For any* product card in the Products Section, when a user hovers over the card, the card must apply lift and glow animation effects (transform and box-shadow changes).
+
+**Validates: Requirements 3.5**
+
+### Property 3: Feature Block Styling Consistency
+
+*For any* feature block in the Why OneKarma Section, the block must use consistent visual styling including the same CSS classes, icon container structure, and typography hierarchy.
+
+**Validates: Requirements 4.3**
+
+### Property 4: Footer Year Display
+
+*For any* year value, when the page loads, the footer copyright section must display that current year dynamically.
+
+**Validates: Requirements 6.2**
+
+### Property 5: No Horizontal Scrolling
+
+*For any* viewport width from 320px to 2560px, the page must reflow content without causing horizontal scrolling (document width must not exceed viewport width).
+
+**Validates: Requirements 8.5**
+
+### Property 6: Fade-In Animation on Scroll
+
+*For any* section or element with the fade-in class, when that element enters the viewport, the element must transition from opacity 0 to opacity 1 with a translateY animation.
+
+**Validates: Requirements 9.2**
+
+### Property 7: Accessible Color Contrast
+
+*For any* text element on the page, the color contrast ratio between the text color and its background color must meet WCAG AA standards (minimum 4.5:1 for normal text, 3:1 for large text).
+
+**Validates: Requirements 10.1, 7.5**
+
+### Property 8: Keyboard Navigation Support
+
+*For any* interactive element (buttons, links), the element must be keyboard accessible (focusable via Tab key and activatable via Enter or Space key).
+
+**Validates: Requirements 10.2**
+
+### Property 9: ARIA Labels Present
+
+*For any* interactive element without visible text content (icon-only buttons, decorative links), the element must include an appropriate aria-label attribute for screen readers.
+
+**Validates: Requirements 10.3**
+
+### Property 10: CTA Button Hover Effects
+
+*For any* CTA button (primary or secondary), when a user hovers over the button, the button must apply visual feedback effects (color, transform, or shadow changes).
+
+**Validates: Requirements 12.3**
+
+### Property 11: CTA Button Smooth Scrolling
+
+*For any* CTA button with a scroll-to target, when clicked, the page must scroll to the target section using smooth scrolling behavior (not instant jump).
+
+**Validates: Requirements 12.4**
+
+## Error Handling
+
+### Invalid Product Data
+
+**Scenario**: Product data is missing required fields (name, description, or status)
+
+**Handling**:
+- Validate product data before rendering
+- Log warning to console for missing fields
+- Render card with placeholder text for missing fields
+- Apply "coming-soon" status as default if status is missing
+
+```javascript
+function validateProduct(product) {
+  return {
+    icon: product.icon || '📦',
+    name: product.name || 'Unnamed Product',
+    description: product.description || 'Description coming soon',
+    status: ['live', 'beta', 'coming-soon'].includes(product.status) 
+      ? product.status 
+      : 'coming-soon'
+  };
+}
+```
+
+### Missing DOM Elements
+
+**Scenario**: JavaScript tries to access DOM elements that don't exist
+
+**Handling**:
+- Check for element existence before manipulation
+- Use optional chaining or null checks
+- Fail gracefully without breaking other functionality
+
+```javascript
+const productsGrid = document.getElementById('products-grid');
+if (productsGrid) {
+  renderProducts(productsGrid);
+} else {
+  console.warn('Products grid element not found');
+}
+```
+
+### Animation Performance Issues
+
+**Scenario**: Animations cause frame drops on low-end devices
+
+**Handling**:
+- Respect `prefers-reduced-motion` media query
+- Use CSS transforms and opacity (GPU-accelerated)
+- Provide fallback to no animation if performance is poor
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+### Viewport Size Edge Cases
+
+**Scenario**: Very small viewports (< 320px) or very large viewports (> 2560px)
+
+**Handling**:
+- Set minimum width: 320px (standard mobile minimum)
+- Set maximum content width: 1440px with centered layout
+- Test at extreme sizes to ensure no layout breaks
+
+### JavaScript Disabled
+
+**Scenario**: User has JavaScript disabled in browser
+
+**Handling**:
+- Core content remains accessible (semantic HTML)
+- Animations won't run, but content is readable
+- CTA buttons won't scroll smoothly (browser default behavior)
+- Products section shows static HTML fallback if provided
+
+## Testing Strategy
+
+### Dual Testing Approach
+
+The OneKarma.AI Landing Website will use both unit tests and property-based tests to ensure comprehensive coverage:
+
+- **Unit tests**: Verify specific examples, edge cases, and concrete scenarios (e.g., "Hero section displays correct headline")
+- **Property tests**: Verify universal properties across all inputs (e.g., "All product cards have required structure")
+
+Both testing approaches are complementary and necessary. Unit tests catch specific bugs and validate concrete requirements, while property tests ensure general correctness across many scenarios.
+
+### Testing Framework
+
+**Property-Based Testing Library**: fast-check (JavaScript)
+- Lightweight, well-maintained PBT library for JavaScript
+- Generates random test data to verify properties
+- Minimum 100 iterations per property test
+
+**Unit Testing Library**: Jest or Vitest
+- Modern JavaScript testing framework
+- DOM testing with jsdom
+- Snapshot testing for component structure
+
+### Property Test Configuration
+
+Each property test must:
+1. Run minimum 100 iterations with randomized inputs
+2. Reference the design document property number
+3. Use tag format: **Feature: onekarma-landing-website, Property {number}: {property_text}**
+
+Example:
+```javascript
+// Feature: onekarma-landing-website, Property 1: Product Card Structure Completeness
+test('all product cards have required structure', () => {
+  fc.assert(
+    fc.property(
+      fc.record({
+        icon: fc.string(),
+        name: fc.string(),
+        description: fc.string(),
+        status: fc.constantFrom('live', 'beta', 'coming-soon')
+      }),
+      (product) => {
+        const card = renderProductCard(product);
+        expect(card.querySelector('.product-name')).toBeTruthy();
+        expect(card.querySelector('.product-description')).toBeTruthy();
+        expect(card.querySelector('.product-status')).toBeTruthy();
+      }
+    ),
+    { numRuns: 100 }
+  );
+});
+```
+
+### Unit Test Focus Areas
+
+Unit tests should focus on:
+
+1. **Specific Examples**:
+   - Hero section displays "OneKarma.AI" headline
+   - Platform Vision section includes "Built for enterprises" text
+   - Footer displays GitHub and LinkedIn links
+
+2. **Edge Cases**:
+   - Empty product array renders empty grid
+   - Very long product names wrap correctly
+   - Missing product status defaults to "coming-soon"
+
+3. **Integration Points**:
+   - CTA button click triggers scroll to correct section
+   - Intersection Observer triggers fade-in animations
+   - Year in footer updates dynamically
+
+4. **Error Conditions**:
+   - Invalid product data is handled gracefully
+   - Missing DOM elements don't break JavaScript
+   - Animation performance degrades gracefully
+
+### Property Test Focus Areas
+
+Property tests should focus on:
+
+1. **Universal Invariants**:
+   - All product cards have complete structure (Property 1)
+   - All text meets contrast requirements (Property 7)
+   - All interactive elements are keyboard accessible (Property 8)
+
+2. **Behavioral Properties**:
+   - Hover effects apply to all product cards (Property 2)
+   - Fade-in animations work for all sections (Property 6)
+   - Smooth scrolling works for all CTA buttons (Property 11)
+
+3. **Layout Properties**:
+   - No horizontal scrolling at any viewport width (Property 5)
+   - Feature blocks maintain consistent styling (Property 3)
+
+### Test Coverage Goals
+
+- **Unit tests**: 80%+ code coverage for JavaScript functions
+- **Property tests**: 100% coverage of all 11 correctness properties
+- **Visual regression**: Snapshot tests for each major section
+- **Accessibility**: Automated axe-core tests for WCAG compliance
+
+### Testing Workflow
+
+1. Write unit tests for specific examples and edge cases
+2. Write property tests for universal properties
+3. Run tests locally before committing
+4. CI/CD pipeline runs all tests on push
+5. Visual regression tests run on pull requests
+6. Manual accessibility testing with screen readers
+
+### Example Test Structure
+
+```javascript
+// Unit test example
+describe('Hero Section', () => {
+  test('displays correct headline', () => {
+    const hero = document.querySelector('.hero-title');
+    expect(hero.textContent).toBe('OneKarma.AI');
+  });
+
+  test('displays two CTA buttons', () => {
+    const buttons = document.querySelectorAll('.hero-cta button');
+    expect(buttons.length).toBe(2);
+  });
+});
+
+// Property test example
+describe('Product Cards', () => {
+  // Feature: onekarma-landing-website, Property 1: Product Card Structure Completeness
+  test('all product cards have required structure', () => {
+    fc.assert(
+      fc.property(
+        productGenerator,
+        (product) => {
+          const card = renderProductCard(product);
+          expect(card.querySelector('.product-name')).toBeTruthy();
+          expect(card.querySelector('.product-description')).toBeTruthy();
+          expect(card.querySelector('.product-status')).toBeTruthy();
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+```
+
+### Continuous Integration
+
+- Run tests on every commit
+- Block merges if tests fail
+- Generate coverage reports
+- Run accessibility audits with Lighthouse
+- Deploy to staging environment for manual testing
+
+This dual testing approach ensures both concrete correctness (unit tests) and general correctness (property tests), providing comprehensive validation of the OneKarma.AI Landing Website.
