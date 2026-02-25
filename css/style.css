@@ -129,17 +129,60 @@ body {
 }
 
 @media (max-width: 768px) {
+  .header-content {
+    justify-content: center;
+  }
+  
+  .header-logo {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    text-align: center;
+  }
+  
+  .header-logo-image {
+    width: 32px;
+  }
+  
   .header-app-name {
-    font-size: 1.25rem;
+    font-size: 1rem;
   }
   
   .header-nav {
-    gap: var(--spacing-sm);
+    width: 100%;
+    justify-content: center;
+    gap: var(--spacing-xs);
   }
   
   .header-link {
     font-size: 0.75rem;
-    padding: var(--spacing-xs);
+    padding: 0.4rem 0.6rem;
+  }
+  
+  body {
+    padding-top: 90px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-header {
+    padding: 0.5rem 0;
+  }
+  
+  .header-logo-image {
+    width: 28px;
+  }
+  
+  .header-app-name {
+    font-size: 0.875rem;
+  }
+  
+  .header-nav {
+    gap: 0.25rem;
+  }
+  
+  .header-link {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
   }
 }
 
