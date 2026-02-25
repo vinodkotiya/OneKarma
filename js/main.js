@@ -165,6 +165,12 @@ class NeuralNetwork {
  */
 const products = [
   {
+    icon: '🔐',
+    name: 'OneKarma SSO',
+    description: 'Unified single sign-on solution for seamless and secure authentication across all your enterprise platforms and applications',
+    status: 'live'
+  },
+  {
     icon: '🧠',
     name: 'Care Management AI',
     description: 'Intelligent care coordination and patient management for healthcare workflows',
@@ -175,12 +181,6 @@ const products = [
     name: 'JIRA AI Integration',
     description: 'AI-powered enhancements for JIRA project management and workflow automation',
     status: 'beta'
-  },
-  {
-    icon: '🔐',
-    name: 'OneKarma SSO',
-    description: 'Unified single sign-on solution for seamless authentication across platforms',
-    status: 'live'
   },
   {
     icon: '⚙️',
