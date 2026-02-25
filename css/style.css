@@ -236,7 +236,7 @@ section {
 .hero-title {
   font-size: 3rem;
   font-weight: 700;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
   background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-blue), var(--color-accent-violet));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -245,11 +245,19 @@ section {
   animation: titleGlow 3s ease-in-out infinite;
 }
 
-.hero-subtitle {
-  font-size: 1.25rem;
+.hero-app-name {
+  font-size: 1rem;
   color: var(--color-text-secondary);
   margin-bottom: var(--spacing-md);
   font-weight: 300;
+  font-style: italic;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+  font-weight: 600;
 }
 
 .hero-description {
@@ -326,6 +334,10 @@ section {
     font-size: 4rem;
   }
   
+  .hero-app-name {
+    font-size: 1.125rem;
+  }
+  
   .hero-subtitle {
     font-size: 1.5rem;
   }
@@ -342,6 +354,10 @@ section {
 @media (min-width: 1024px) {
   .hero-title {
     font-size: 5rem;
+  }
+  
+  .hero-app-name {
+    font-size: 1.25rem;
   }
   
   .hero-subtitle {
@@ -861,4 +877,58 @@ section {
 .footer-separator {
   color: var(--color-text-secondary);
   font-size: 0.875rem;
+}
+
+
+/* ============================================
+   App Purpose Section
+   ============================================ */
+.app-purpose-section {
+  background: var(--color-bg-secondary);
+  padding: var(--spacing-xl) 0;
+}
+
+.purpose-content {
+  max-width: 800px;
+  margin: 0 auto;
+  background: rgba(26, 26, 46, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: var(--spacing-lg);
+}
+
+.purpose-content p {
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  margin-bottom: var(--spacing-md);
+  font-size: 1.125rem;
+}
+
+.purpose-content strong {
+  color: var(--color-accent-cyan);
+  font-weight: 600;
+}
+
+.purpose-content h3 {
+  color: var(--color-text-primary);
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  font-size: 1.5rem;
+}
+
+.purpose-content ul {
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  margin-bottom: var(--spacing-lg);
+  padding-left: var(--spacing-lg);
+}
+
+.purpose-content li {
+  margin-bottom: var(--spacing-sm);
+  font-size: 1.125rem;
+}
+
+.purpose-content li strong {
+  color: var(--color-accent-cyan);
 }
