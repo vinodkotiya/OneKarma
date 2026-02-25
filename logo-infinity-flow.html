@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo #1 - Infinity Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #00f5ff;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 40px;
+        }
+
+        /* LOGO CONTAINER FOR EXPORT */
+        .logo-export-container {
+            background: transparent;
+            padding: 40px;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        /* Main Logo - Infinity Flow */
+        .logo {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .logo-circle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            border: 4px solid #00f5ff;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 10px rgba(0, 245, 255, 0.5),
+                0 0 20px rgba(0, 245, 255, 0.3),
+                inset 0 0 10px rgba(0, 245, 255, 0.2);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .logo-line {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 80px;
+            background: linear-gradient(180deg, #00f5ff 0%, #0088ff 100%);
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.6);
+        }
+
+        .logo-infinity {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 35px;
+        }
+
+        .logo-infinity::before,
+        .logo-infinity::after {
+            content: '';
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border: 3px solid #00d9ff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(0, 217, 255, 0.5);
+        }
+
+        .logo-infinity::before {
+            left: 0;
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+        }
+
+        .logo-infinity::after {
+            right: 0;
+            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: translateX(-50%) scale(1); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: translateX(-50%) scale(1.05); 
+                opacity: 0.8; 
+            }
+        }
+
+        /* Preview Backgrounds */
+        .preview-section {
+            margin: 40px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .preview-box {
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-box.dark {
+            background: #000;
+        }
+
+        .preview-box.light {
+            background: #fff;
+        }
+
+        .preview-box.gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .preview-box h3 {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .preview-box.light h3 {
+            color: #333;
+        }
+
+        /* Code Section */
+        .code-section {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .code-section h3 {
+            color: #00f5ff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        pre {
+            background: #0a0a0a;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #0ff;
+        }
+
+        .copy-btn {
+            background: #00f5ff;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #00d9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 245, 255, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .instructions {
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid #00f5ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #00f5ff;
+            margin-bottom: 15px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+            color: #ccc;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .instructions code {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #00f5ff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .download-section {
+            margin: 30px 0;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #00f5ff 0%, #0088ff 100%);
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 245, 255, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 245, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Logo #1 - Infinity Flow</h1>
+        <p class="subtitle">Your AI Invoice Platform Logo</p>
+
+        <!-- Logo Preview -->
+        <div class="logo-export-container" id="logoExport">
+            <div class="logo">
+                <div class="logo-circle"></div>
+                <div class="logo-line"></div>
+                <div class="logo-infinity"></div>
+            </div>
+        </div>
+
+        <!-- Download Button -->
+        <div class="download-section">
+            <button class="download-btn" onclick="downloadPNG()">
+                📥 Download Transparent PNG
+            </button>
+            <p style="color: #888; margin-top: 15px; font-size: 0.9rem;">
+                Right-click the logo above and "Save Image As" (or use the button)
+            </p>
+        </div>
+
+        <!-- Preview on Different Backgrounds -->
+        <div class="preview-section">
+            <div class="preview-box dark">
+                <h3>On Dark Background</h3>
+                <div class="logo">
+                    <div class="logo-circle"></div>
+                    <div class="logo-line"></div>
+                    <div class="logo-infinity"></div>
+                </div>
+            </div>
+            <div class="preview-box light">
+                <h3>On Light Background</h3>
+                <div class="logo" style="filter: brightness(0) saturate(100%) invert(50%) sepia(94%) saturate(2593%) hue-rotate(162deg) brightness(101%) contrast(101%);">
+                    <div class="logo-circle"></div>
+                    <div class="logo-line"></div>
+                    <div class="logo-infinity"></div>
+                </div>
+            </div>
+            <div class="preview-box gradient">
+                <h3>On Gradient Background</h3>
+                <div class="logo">
+                    <div class="logo-circle"></div>
+                    <div class="logo-line"></div>
+                    <div class="logo-infinity"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HTML/CSS Code -->
+        <div class="code-section">
+            <h3>📋 HTML + CSS Code (Copy & Paste)</h3>
+            <pre id="htmlCode">&lt;!-- Infinity Flow Logo --&gt;
+&lt;div class="logo"&gt;
+    &lt;div class="logo-circle"&gt;&lt;/div&gt;
+    &lt;div class="logo-line"&gt;&lt;/div&gt;
+    &lt;div class="logo-infinity"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+.logo {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+.logo-circle {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 120px;
+    border: 4px solid #00f5ff;
+    border-radius: 50%;
+    box-shadow: 
+        0 0 10px rgba(0, 245, 255, 0.5),
+        0 0 20px rgba(0, 245, 255, 0.3),
+        inset 0 0 10px rgba(0, 245, 255, 0.2);
+    animation: pulse 3s ease-in-out infinite;
+}
+
+.logo-line {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 80px;
+    background: linear-gradient(180deg, #00f5ff 0%, #0088ff 100%);
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.6);
+}
+
+.logo-infinity {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 35px;
+}
+
+.logo-infinity::before,
+.logo-infinity::after {
+    content: '';
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border: 3px solid #00d9ff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0, 217, 255, 0.5);
+}
+
+.logo-infinity::before {
+    left: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+}
+
+.logo-infinity::after {
+    right: 0;
+    clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: translateX(-50%) scale(1); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: translateX(-50%) scale(1.05); 
+        opacity: 0.8; 
+    }
+}
+&lt;/style&gt;</pre>
+            <button class="copy-btn" onclick="copyCode()">📋 Copy Code</button>
+        </div>
+
+        <!-- React Component Version -->
+        <div class="code-section">
+            <h3>⚛️ React Component Version</h3>
+            <pre id="reactCode">import React from 'react';
+import './Logo.css'; // Use the CSS above
+
+const Logo = ({ size = 200 }) => {
+    const scale = size / 200;
+    
+    return (
+        &lt;div 
+            className="logo" 
+            style={{ 
+                width: size, 
+                height: size,
+                transform: `scale(${scale})`
+            }}
+        &gt;
+            &lt;div className="logo-circle"&gt;&lt;/div&gt;
+            &lt;div className="logo-line"&gt;&lt;/div&gt;
+            &lt;div className="logo-infinity"&gt;&lt;/div&gt;
+        &lt;/div&gt;
+    );
+};
+
+export default Logo;
+
+// Usage:
+// &lt;Logo size={100} /&gt;  // Small
+// &lt;Logo size={200} /&gt;  // Default
+// &lt;Logo size={400} /&gt;  // Large</pre>
+            <button class="copy-btn" onclick="copyReactCode()">📋 Copy React Code</button>
+        </div>
+
+        <!-- SVG Version -->
+        <div class="code-section">
+            <h3>🎨 SVG Version (Scalable & Lightweight)</h3>
+            <pre id="svgCode">&lt;svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"&gt;
+    &lt;defs&gt;
+        &lt;linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%"&gt;
+            &lt;stop offset="0%" style="stop-color:#00f5ff;stop-opacity:1" /&gt;
+            &lt;stop offset="100%" style="stop-color:#0088ff;stop-opacity:1" /&gt;
+        &lt;/linearGradient&gt;
+        &lt;filter id="glow"&gt;
+            &lt;feGaussianBlur stdDeviation="3" result="coloredBlur"/&gt;
+            &lt;feMerge&gt;
+                &lt;feMergeNode in="coloredBlur"/&gt;
+                &lt;feMergeNode in="SourceGraphic"/&gt;
+            &lt;/feMerge&gt;
+        &lt;/filter&gt;
+    &lt;/defs&gt;
+    
+    &lt;!-- Circle (0) --&gt;
+    &lt;circle cx="100" cy="60" r="58" 
+            fill="none" 
+            stroke="#00f5ff" 
+            stroke-width="4" 
+            filter="url(#glow)" /&gt;
+    
+    &lt;!-- Line (1) --&gt;
+    &lt;rect x="98" y="60" width="4" height="80" 
+          fill="url(#lineGradient)" 
+          filter="url(#glow)" /&gt;
+    
+    &lt;!-- Infinity (∞) --&gt;
+    &lt;g transform="translate(60, 165)"&gt;
+        &lt;circle cx="17.5" cy="17.5" r="16.5" 
+                fill="none" 
+                stroke="#00d9ff" 
+                stroke-width="3"
+                clip-path="polygon(0 0, 100% 0, 100% 50%, 0 50%)"
+                filter="url(#glow)" /&gt;
+        &lt;circle cx="62.5" cy="17.5" r="16.5" 
+                fill="none" 
+                stroke="#00d9ff" 
+                stroke-width="3"
+                clip-path="polygon(0 50%, 100% 50%, 100% 100%, 0 100%)"
+                filter="url(#glow)" /&gt;
+    &lt;/g&gt;
+&lt;/svg&gt;</pre>
+            <button class="copy-btn" onclick="copySVGCode()">📋 Copy SVG Code</button>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <h3>📝 How to Use Your Logo</h3>
+            <ol>
+                <li><strong>Download PNG:</strong> Click the download button above for a transparent 200x200px PNG (perfect for favicons, app icons)</li>
+                <li><strong>For Websites:</strong> Copy the HTML+CSS code and paste it into your project</li>
+                <li><strong>For React:</strong> Use the React component version for Next.js/React apps</li>
+                <li><strong>For Scalability:</strong> Use the SVG version - it scales to any size without quality loss</li>
+                <li><strong>Color Customization:</strong> Change <code>#00f5ff</code> to any color you want</li>
+                <li><strong>Size Adjustment:</strong> Change the <code>width: 200px; height: 200px</code> to scale the logo</li>
+            </ol>
+        </div>
+
+        <p style="color: #666; margin-top: 40px; font-size: 0.9rem;">
+            🎯 Logo represents: Starting from nothing (0) → Taking action (1) → Achieving infinite potential (∞)
+        </p>
+    </div>
+
+    <script>
+        function copyCode() {
+            const code = document.getElementById('htmlCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function copyReactCode() {
+            const code = document.getElementById('reactCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function copySVGCode() {
+            const code = document.getElementById('svgCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function downloadPNG() {
+            // Create a canvas with the logo
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const size = 400; // Higher resolution
+            canvas.width = size;
+            canvas.height = size;
+
+            // Scale factor
+            const scale = size / 200;
+
+            // Draw circle
+            ctx.strokeStyle = '#00f5ff';
+            ctx.lineWidth = 4 * scale;
+            ctx.shadowBlur = 10 * scale;
+            ctx.shadowColor = 'rgba(0, 245, 255, 0.5)';
+            ctx.beginPath();
+            ctx.arc(size/2, size * 0.3, 60 * scale, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw line
+            ctx.shadowBlur = 5 * scale;
+            const gradient = ctx.createLinearGradient(0, size * 0.3, 0, size * 0.7);
+            gradient.addColorStop(0, '#00f5ff');
+            gradient.addColorStop(1, '#0088ff');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(size/2 - 2*scale, size * 0.3, 4*scale, 80*scale);
+
+            // Draw infinity (two circles)
+            ctx.strokeStyle = '#00d9ff';
+            ctx.lineWidth = 3 * scale;
+            ctx.shadowBlur = 8 * scale;
+            ctx.shadowColor = 'rgba(0, 217, 255, 0.5)';
+            
+            // Left loop
+            ctx.beginPath();
+            ctx.arc(size/2 - 22.5*scale, size * 0.825, 17.5*scale, Math.PI, 0);
+            ctx.stroke();
+            
+            // Right loop
+            ctx.beginPath();
+            ctx.arc(size/2 + 22.5*scale, size * 0.825, 17.5*scale, 0, Math.PI);
+            ctx.stroke();
+
+            // Download
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'infinity-flow-logo.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+    </script>
+</body>
+</html>
