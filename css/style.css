@@ -60,6 +60,90 @@ body {
 }
 
 /* ============================================
+   Top Header Navigation
+   ============================================ */
+.top-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+  padding: var(--spacing-sm) 0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.header-logo-image {
+  width: 40px;
+  height: auto;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.3));
+}
+
+.header-app-name {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-accent-cyan);
+  text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.header-nav {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.header-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 6px;
+}
+
+.header-link:hover {
+  color: var(--color-accent-cyan);
+  background: rgba(0, 255, 255, 0.1);
+}
+
+/* Add padding to body to account for fixed header */
+body {
+  padding-top: 70px;
+}
+
+@media (max-width: 768px) {
+  .header-app-name {
+    font-size: 1.25rem;
+  }
+  
+  .header-nav {
+    gap: var(--spacing-sm);
+  }
+  
+  .header-link {
+    font-size: 0.75rem;
+    padding: var(--spacing-xs);
+  }
+}
+
+/* ============================================
    Typography
    ============================================ */
 h1, h2, h3 {
