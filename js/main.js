@@ -160,27 +160,28 @@ class NeuralNetwork {
 
 /**
  * Product data array
- * Each product has: icon, name, description, and status
+ * Each product has: icon, name, description, status, and optional link
  * Status can be: 'live', 'beta', or 'coming-soon'
  */
 const products = [
   {
-    icon: '🔐',
-    name: 'OneKarma SSO',
-    description: 'Unified single sign-on solution for seamless and secure authentication across all your enterprise platforms and applications',
-    status: 'live'
-  },
-  {
     icon: '🧠',
     name: 'Care Management AI',
     description: 'Intelligent care coordination and patient management for healthcare workflows',
-    status: 'live'
+    status: 'live',
+    link: 'https://care.onekarma.ai'
   },
   {
     icon: '🔧',
     name: 'JIRA AI Integration',
     description: 'AI-powered enhancements for JIRA project management and workflow automation',
     status: 'beta'
+  },
+  {
+    icon: '🔐',
+    name: 'OneKarma SSO',
+    description: 'Unified single sign-on solution for seamless and secure authentication across all your enterprise platforms',
+    status: 'live'
   },
   {
     icon: '⚙️',
@@ -297,6 +298,22 @@ function createProductCard(product) {
   card.className = 'product-card fade-in';
   card.setAttribute('data-status', product.status);
   
+  // If product has a link, make it clickable
+  if (product.link) {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => {
+      window.open(product.link, '_blank', 'noopener,noreferrer');
+    });
+    card.setAttribute('role', 'link');
+    card.setAttribute('tabindex', '0');
+    card.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        window.open(product.link, '_blank', 'noopener,noreferrer');
+      }
+    });
+  }
+  
   // Create icon
   const icon = document.createElement('div');
   icon.className = 'product-icon';
@@ -317,6 +334,15 @@ function createProductCard(product) {
   const status = document.createElement('span');
   status.className = 'product-status';
   status.textContent = formatStatus(product.status);
+  
+  // Add link indicator if product has a link
+  if (product.link) {
+    const linkIndicator = document.createElement('span');
+    linkIndicator.className = 'product-link-indicator';
+    linkIndicator.innerHTML = '→';
+    linkIndicator.setAttribute('aria-label', 'Visit product');
+    card.appendChild(linkIndicator);
+  }
   
   // Assemble card
   card.appendChild(icon);

@@ -539,6 +539,29 @@ section {
   overflow: hidden;
 }
 
+.product-card[role="link"] {
+  cursor: pointer;
+}
+
+.product-card[role="link"]:hover {
+  border-color: rgba(0, 255, 255, 0.5);
+}
+
+.product-link-indicator {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  font-size: 1.5rem;
+  color: var(--color-accent-cyan);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.product-card[role="link"]:hover .product-link-indicator {
+  opacity: 1;
+  transform: translateX(5px);
+}
+
 .product-card::before {
   content: '';
   position: absolute;
