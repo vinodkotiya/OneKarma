@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneKarma.AI — Light Therapy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Cinzel:wght@300;400&family=Raleway:wght@100;200;300&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Raleway',sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+
+/* ── AUTO-CYCLE TIMER BAR ── */
+#timer-bar{
+  position:fixed;top:0;left:0;height:3px;width:0%;
+  background:rgba(255,255,255,0.35);z-index:30;
+  transition:none;box-shadow:0 0 8px rgba(255,255,255,0.4)
+}
+#timer-bar.paused{ opacity:0.3 }
+
+/* ── HUD ── */
+#prog-label{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);
+  font-family:'Cinzel',serif;font-weight:300;
+  font-size:clamp(11px,1.8vw,20px);letter-spacing:.4em;
+  color:rgba(255,255,255,0);text-transform:uppercase;
+  transition:color 2s ease;pointer-events:none;white-space:nowrap;z-index:20;
+  text-shadow:0 0 30px rgba(255,255,255,.5)
+}
+#prog-label.show{color:rgba(255,255,255,.85)}
+#prog-tag-el{
+  position:fixed;top:calc(18px + clamp(11px,1.8vw,20px) + 6px);
+  left:50%;transform:translateX(-50%);
+  font-size:clamp(7px,.85vw,10px);letter-spacing:.4em;
+  color:rgba(255,255,255,0);text-transform:uppercase;
+  transition:color 2s ease .15s;pointer-events:none;white-space:nowrap;z-index:20
+}
+#prog-tag-el.show{color:rgba(255,255,255,.35)}
+#affirmation{
+  position:fixed;bottom:44px;left:50%;transform:translateX(-50%);
+  font-family:'Cinzel',serif;font-weight:300;
+  font-size:clamp(9px,1.2vw,14px);letter-spacing:.35em;
+  color:rgba(255,255,255,.6);text-transform:uppercase;
+  white-space:nowrap;pointer-events:none;z-index:20;
+  transition:opacity 2s ease;text-shadow:0 0 20px rgba(255,255,255,.3)
+}
+
+/* ── SPEED HUD ── */
+#spd-hud{
+  position:fixed;top:20px;left:20px;z-index:20;
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;
+  color:rgba(255,255,255,.0);text-transform:uppercase;
+  transition:color .4s;pointer-events:none
+}
+#spd-hud.show{color:rgba(255,255,255,.4)}
+#logo-mark{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  font-family:'Cinzel',serif;font-size:clamp(8px,.9vw,10px);letter-spacing:.45em;
+  color:rgba(255,255,255,.12);text-transform:uppercase;pointer-events:none;z-index:15;
+  white-space:nowrap
+}
+
+/* ── AUTO BADGE ── */
+#auto-badge{
+  position:fixed;bottom:20px;left:20px;z-index:30;
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;
+  color:rgba(255,255,255,.35);text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  transition:color .3s
+}
+#auto-badge:hover{color:rgba(255,255,255,.7)}
+#auto-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:rgba(255,255,255,.5);
+  animation:pulse-dot 1.4s ease-in-out infinite
+}
+#auto-dot.off{animation:none;background:rgba(255,255,255,.15)}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.4);opacity:1}}
+
+/* ── SPEED CONTROL ── */
+#speed-ctrl{
+  position:fixed;bottom:14px;right:62px;z-index:30;
+  display:flex;flex-direction:column;align-items:center;gap:3px
+}
+.spd-btn{
+  width:28px;height:22px;border:1px solid rgba(255,255,255,.18);
+  border-radius:4px;background:rgba(0,0,0,.55);
+  color:rgba(255,255,255,.5);font-size:11px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);transition:all .2s;line-height:1
+}
+.spd-btn:hover{border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.1)}
+.spd-btn:active{transform:scale(.92)}
+#spd-label{
+  font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;
+  color:rgba(255,255,255,.25);text-transform:uppercase;white-space:nowrap
+}
+
+/* ── MODE TOGGLE ── */
+#mode-toggle{
+  position:fixed;top:20px;right:70px;z-index:30;
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:.25em;
+  color:rgba(255,255,255,.3);text-transform:uppercase;
+  cursor:pointer;border:1px solid rgba(255,255,255,.12);
+  padding:6px 12px;border-radius:20px;backdrop-filter:blur(10px);
+  background:rgba(0,0,0,.4);transition:all .3s;white-space:nowrap
+}
+#mode-toggle:hover{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.4)}
+#mode-toggle.geo{color:rgba(180,140,255,.9);border-color:rgba(180,140,255,.4);
+  background:rgba(60,0,100,.4)}
+
+/* ── MENU BTN ── */
+#menu-btn{
+  position:fixed;top:14px;right:18px;z-index:100;
+  width:38px;height:38px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.7);
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;
+  backdrop-filter:blur(10px);transition:all .3s
+}
+#menu-btn:hover{border-color:rgba(255,255,255,.5);transform:scale(1.1)}
+#menu-btn span{display:block;width:14px;height:1px;background:rgba(255,255,255,.7)}
+
+/* ── MENU OVERLAY ── */
+#menu{
+  position:fixed;inset:0;background:rgba(0,0,0,.96);
+  backdrop-filter:blur(24px);z-index:200;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:0;
+  opacity:0;pointer-events:none;transition:opacity .4s;overflow-y:auto;padding:20px 0
+}
+#menu.open{opacity:1;pointer-events:all}
+#menu-top{text-align:center;margin-bottom:20px}
+#menu-top h2{font-family:'Cinzel',serif;font-weight:300;
+  font-size:clamp(11px,1.6vw,16px);letter-spacing:.5em;
+  color:rgba(255,255,255,.4);text-transform:uppercase;margin-bottom:6px}
+#menu-top p{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.2);text-transform:uppercase}
+
+/* Section tabs */
+#section-tabs{display:flex;gap:8px;margin-bottom:18px}
+.stab{padding:7px 20px;border:1px solid rgba(255,255,255,.1);border-radius:20px;
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:.25em;text-transform:uppercase;
+  color:rgba(255,255,255,.3);cursor:pointer;transition:all .25s;background:transparent}
+.stab.active{color:#fff;border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.08)}
+.stab.geo-tab.active{color:rgb(200,160,255);border-color:rgba(180,140,255,.5);background:rgba(80,0,140,.3)}
+
+#section-bands,#section-geo{display:none}
+#section-bands.visible,#section-geo.visible{display:block}
+
+#pgrid,#ggrid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:7px;width:min(800px,92vw);margin:0 auto
+}
+.pcard{padding:10px 7px;border:1px solid rgba(255,255,255,.08);border-radius:4px;
+  cursor:pointer;text-align:center;background:rgba(255,255,255,.02);transition:all .25s}
+.pcard:hover,.pcard.on{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.07)}
+.pcard .sw{width:100%;height:5px;border-radius:2px;margin-bottom:6px}
+.pcard .pn{font-family:'Cinzel',serif;font-size:clamp(7px,.85vw,9px);
+  letter-spacing:.1em;color:rgba(255,255,255,.8);text-transform:uppercase}
+.pcard .pt{font-size:7px;color:rgba(255,255,255,.3);margin-top:2px}
+
+.gcard{padding:10px 7px;border:1px solid rgba(120,80,180,.15);border-radius:4px;
+  cursor:pointer;text-align:center;background:rgba(60,0,100,.06);transition:all .25s}
+.gcard:hover,.gcard.on{border-color:rgba(180,140,255,.4);background:rgba(80,0,140,.15)}
+.gcard .dot{width:26px;height:26px;border-radius:50%;margin:0 auto 6px}
+.gcard .gn{font-family:'Cinzel',serif;font-size:clamp(7px,.85vw,9px);
+  letter-spacing:.1em;color:rgba(200,160,255,.9);text-transform:uppercase}
+.gcard .gt{font-size:7px;color:rgba(180,140,255,.35);margin-top:2px}
+
+#close-btn{margin-top:20px;padding:7px 22px;border:1px solid rgba(255,255,255,.15);
+  border-radius:2px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;
+  color:rgba(255,255,255,.3);cursor:pointer;text-transform:uppercase;
+  transition:all .3s;background:transparent}
+#close-btn:hover{color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.4)}
+
+/* ── SPLASH ── */
+#splash{position:fixed;inset:0;z-index:300;background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+#splash h1{font-family:'Cinzel',serif;font-weight:300;
+  font-size:clamp(22px,5vw,48px);letter-spacing:.4em;color:#fff}
+#splash p{font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.3);text-transform:uppercase}
+#splash .sub{font-size:9px;letter-spacing:.25em;color:rgba(255,255,255,.18);
+  text-transform:uppercase;margin-top:4px}
+.sbtn{padding:12px 34px;border:1px solid rgba(255,255,255,.25);border-radius:2px;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:.3em;text-transform:uppercase;
+  color:#fff;cursor:pointer;background:rgba(255,255,255,.05);transition:all .3s;margin-top:6px}
+.sbtn:hover{background:rgba(255,255,255,.15)}
+.sbtn.ghost{background:none;border:none;color:rgba(255,255,255,.2);font-size:9px}
+
+/* ── TRANSITION FLASH ── */
+#flash{position:fixed;inset:0;background:#fff;opacity:0;z-index:25;pointer-events:none;transition:opacity .15s}
+
+/* ── KEYBOARD REFERENCE (splash) ── */
+#kbd-ref{
+  margin-top:22px;padding:18px 28px;
+  border:1px solid rgba(255,255,255,.1);border-radius:6px;
+  background:rgba(255,255,255,.03);backdrop-filter:blur(10px);
+  width:min(360px,88vw)
+}
+.kbd-title{
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:.4em;
+  color:rgba(255,255,255,.25);text-transform:uppercase;
+  text-align:center;margin-bottom:14px
+}
+.kbd-grid{display:flex;flex-direction:column;gap:7px}
+.kbd-row{display:flex;align-items:center;gap:12px}
+.kbd-row kbd{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  padding:3px 7px;border:1px solid rgba(255,255,255,.2);
+  border-radius:3px;background:rgba(255,255,255,.06);
+  color:rgba(255,255,255,.7);white-space:nowrap;min-width:32px;
+  text-align:center;line-height:1.5
+}
+.kbd-row span{
+  font-size:9px;letter-spacing:.15em;color:rgba(255,255,255,.3);
+  text-transform:uppercase
+}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<div id="timer-bar"></div>
+<div id="prog-label"></div>
+<div id="prog-tag-el"></div>
+<div id="affirmation">I am radiant, whole, and fully alive</div>
+<div id="flash"></div>
+<div id="spd-hud"></div>
+<div id="logo-mark">OneKarma.AI · Light Therapy</div>
+
+<div id="auto-badge" title="Click to pause/resume auto-cycle [A]">
+  <div id="auto-dot"></div>
+  <span id="auto-text">Auto</span>
+</div>
+
+<!-- Speed Control -->
+<div id="speed-ctrl" title="Animation speed [↑ ↓]">
+  <button class="spd-btn" id="spd-up" title="Faster [↑]">▲</button>
+  <span id="spd-label">Speed</span>
+  <button class="spd-btn" id="spd-dn" title="Slower [↓]">▼</button>
+</div>
+
+<div id="mode-toggle" title="Switch display mode [G]">⬡ Bands</div>
+<button id="menu-btn" title="Programs [M]"><span></span><span></span><span></span></button>
+
+<div id="menu">
+  <div id="menu-top">
+    <h2>OneKarma.AI — Light Therapy</h2>
+    <p>Select a program or toggle display mode</p>
+  </div>
+  <div id="section-tabs">
+    <div class="stab active" id="tab-bands">Pyramid Bands</div>
+    <div class="stab geo-tab" id="tab-geo">Sacred Geometry</div>
+  </div>
+  <div id="section-bands" class="visible">
+    <div id="pgrid"></div>
+  </div>
+  <div id="section-geo">
+    <div id="ggrid"></div>
+  </div>
+  <button id="close-btn">Close [Esc]</button>
+</div>
+
+<div id="splash">
+  <h1>OneKarma<span style="font-size:.55em;opacity:.6;letter-spacing:.2em">.AI</span></h1>
+  <p>Sacred Light Frequency Therapy</p>
+  <div class="sub">Auto-cycling · 16 Programs · 2 Display Modes</div>
+  <button class="sbtn" id="fs-go">⛶ Enter Fullscreen</button>
+  <button class="sbtn ghost" id="win-go">Continue in window</button>
+  <!-- Keyboard shortcut reference -->
+  <div id="kbd-ref">
+    <div class="kbd-title">Keyboard Shortcuts</div>
+    <div class="kbd-grid">
+      <div class="kbd-row"><kbd>F</kbd><span>Fullscreen</span></div>
+      <div class="kbd-row"><kbd>M</kbd><span>Open menu</span></div>
+      <div class="kbd-row"><kbd>G</kbd><span>Toggle Bands / Geometry</span></div>
+      <div class="kbd-row"><kbd>A</kbd><span>Auto / Manual cycle</span></div>
+      <div class="kbd-row"><kbd>← →</kbd><span>Previous / Next program</span></div>
+      <div class="kbd-row"><kbd>↑ ↓</kbd><span>Speed up / Slow down</span></div>
+      <div class="kbd-row"><kbd>Esc</kbd><span>Close menu</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════
+// TEXT POOL for scrolling bands
+// ════════════════════════════════════════════════════════
+const TEXT_PHRASES = [
+  "I AM WHOLE AND RADIANT",
+  "EVERY CELL VIBRATES WITH LIGHT",
+  "I RELEASE ALL THAT NO LONGER SERVES",
+  "MY BODY IS A VESSEL OF PURE ENERGY",
+  "I AM ALIGNED WITH THE HIGHEST FREQUENCY",
+  "LOVE FLOWS THROUGH EVERY PART OF ME",
+  "I AM HEALED I AM WHOLE I AM FREE",
+  "GRATITUDE IS MY NATURAL STATE",
+  "I ATTRACT ABUNDANCE IN ALL FORMS",
+  "MY VIBRATION RISES WITH EVERY BREATH",
+  "I AM CONNECTED TO ALL LIFE",
+  "TRANSFORMATION FLOWS THROUGH ME NOW",
+  "I TRUST THE INTELLIGENCE OF MY BODY",
+  "LIGHT FILLS EVERY SHADOW WITHIN ME",
+  "I AM THE PEACE I SEEK",
+  "MY ENERGY IS UNSTOPPABLE",
+  "I RADIATE HEALING TO ALL AROUND ME",
+  "DIVINE INTELLIGENCE GUIDES MY PATH",
+  "I AM WORTHY OF ALL GOOD THINGS",
+  "I BREATHE IN LIGHT I BREATHE OUT LOVE",
+];
+
+// ════════════════════════════════════════════════════════
+// PROGRAMS — shared between both display modes
+// ════════════════════════════════════════════════════════
+const PROGRAMS = [
+  { id:'peles_fire',  name:"Pele's Fire",          tag:'Detox · Circulation · Energy',
+    palette:[{col:'#00E5FF',w:3},{col:'#FF2200',w:1},{col:'#00BCD4',w:2},{col:'#FF4400',w:1},{col:'#00FFEA',w:2},{col:'#001A1F',dark:true,w:1},{col:'#FF1100',w:1},{col:'#007A87',w:1}],
+    bg:'#010808', glow:'#FF4400', speed:1.1, geo_spd:1.2, geo_mode:'vortex_fire',
+    geo_c:['#FF2200','#FF6600','#FF0044','#FF5500'], geo_bg:[8,1,0],
+    aff:["I release what no longer serves","My energy is unstoppable","I transform and rise","I am alive with passion"] },
+
+  { id:'mystic_forest', name:'Mystic Forest',      tag:'Regeneration · Immune · Focus',
+    palette:[{col:'#00FF88',w:3},{col:'#FF1493',w:1},{col:'#00CC66',w:2},{col:'#FF4444',w:1},{col:'#66FF99',w:2},{col:'#001A08',dark:true,w:1},{col:'#FF0066',w:1},{col:'#00AA44',w:1}],
+    bg:'#000a02', glow:'#00FF88', speed:0.7, geo_spd:0.5, geo_mode:'tree_rings',
+    geo_c:['#00FF88','#00CC44','#66FF99','#00FF44'], geo_bg:[0,7,2],
+    aff:["I am rooted and strong","Nature heals me deeply","I grow and regenerate","I breathe freely"] },
+
+  { id:'ocean', name:'Ocean',                      tag:'Sleep · Stress · Collagen',
+    palette:[{col:'#00E5FF',w:4},{col:'#001A22',dark:true,w:2},{col:'#00BCD4',w:3},{col:'#002233',dark:true,w:1},{col:'#00FFEA',w:2},{col:'#80DEEA',w:2},{col:'#003344',dark:true,w:1},{col:'#B2EBF2',w:1}],
+    bg:'#000308', glow:'#00CCFF', speed:0.45, geo_spd:0.38, geo_mode:'deep_wave',
+    geo_c:['#0088FF','#00CCFF','#0044CC','#00FFEE'], geo_bg:[0,3,8],
+    aff:["I flow with ease and grace","Deep peace fills my being","I rest and restore","I am calm as still water"] },
+
+  { id:'violet_transform', name:'Violet Transformation', tag:'Detox · Emotional · Spirit',
+    palette:[{col:'#00E5FF',w:3},{col:'#AA00FF',w:1},{col:'#E0F7FA',w:2},{col:'#CC44FF',w:1},{col:'#00BCD4',w:2},{col:'#8800CC',w:1},{col:'#FF00FF',w:1},{col:'#001A22',dark:true,w:1}],
+    bg:'#020008', glow:'#AA00FF', speed:0.65, geo_spd:0.7, geo_mode:'sacred_spiral',
+    geo_c:['#8800FF','#CC44FF','#5500AA','#AA00CC'], geo_bg:[2,0,8],
+    aff:["I transform with grace","Old patterns dissolve","I am spiritually awakened","My spirit soars freely"] },
+
+  { id:'life_celebration', name:'Life Celebration', tag:'Anti-Aging · Detox · Mood',
+    palette:[{col:'#FF2200',w:2},{col:'#00FF66',w:2},{col:'#0055FF',w:2},{col:'#FF4400',w:1},{col:'#00CCFF',w:2},{col:'#FF1100',w:1},{col:'#00FF99',w:2},{col:'#0022CC',w:1}],
+    bg:'#010101', glow:'#00FF66', speed:1.2, geo_spd:0.75, geo_mode:'mandala_bloom',
+    geo_c:['#FF69B4','#FFD700','#FF4500','#ADFF2F'], geo_bg:[3,1,5],
+    aff:["I celebrate my existence","Joy fills every cell","I am grateful for this moment","Life is beautiful"] },
+
+  { id:'golden_light', name:'Golden Light',        tag:'Energy · Mood · Skin',
+    palette:[{col:'#FFD700',w:3},{col:'#FF8C00',w:1},{col:'#FFE066',w:2},{col:'#FFA500',w:1},{col:'#FFEE88',w:2},{col:'#FF6600',w:1},{col:'#201000',dark:true,w:1},{col:'#FFD000',w:2}],
+    bg:'#060400', glow:'#FFD700', speed:0.55, geo_spd:0.55, geo_mode:'flower_life',
+    geo_c:['#FFD700','#FFA500','#FFE066','#FF8C00'], geo_bg:[6,4,0],
+    aff:["I radiate golden energy","I am vibrant and alive","Life flows through me freely","I am whole and luminous"] },
+
+  { id:'high_magic', name:'High Magic',            tag:'Alertness · Focus · Balance',
+    palette:[{col:'#CC00FF',w:3},{col:'#FF00FF',w:1},{col:'#8800FF',w:2},{col:'#FF44FF',w:1},{col:'#AA00CC',w:2},{col:'#050008',dark:true,w:1},{col:'#DD00DD',w:1},{col:'#6600AA',w:1}],
+    bg:'#04000a', glow:'#CC00FF', speed:0.9, geo_spd:0.9, geo_mode:'merkaba_spin',
+    geo_c:['#AA00FF','#FF00FF','#7700CC','#FF44FF'], geo_bg:[4,0,9],
+    aff:["My mind is crystal clear","I perceive beyond the veil","Clarity and focus are mine","I am fully present"] },
+
+  { id:'passion', name:'Passion',                  tag:'Regeneration · Pain · Lymph',
+    palette:[{col:'#FF0000',w:3},{col:'#FF3333',w:2},{col:'#CC0000',w:2},{col:'#FF0066',w:1},{col:'#150000',dark:true,w:1},{col:'#FF2200',w:2},{col:'#990000',w:1},{col:'#FF4444',w:1}],
+    bg:'#070000', glow:'#FF0033', speed:1.3, geo_spd:1.0, geo_mode:'pulse_rings',
+    geo_c:['#FF0000','#CC0000','#FF3333','#FF0066'], geo_bg:[7,0,0],
+    aff:["I am deeply alive","My passion ignites the world","Vitality surges through me","I create with fierce love"] },
+
+  { id:'heart', name:'Heart Light',                tag:'Immune · Mood · Circulation',
+    palette:[{col:'#FF4488',w:3},{col:'#FF2266',w:2},{col:'#FF6699',w:2},{col:'#FF0044',w:1},{col:'#FF88AA',w:2},{col:'#0A0003',dark:true,w:1},{col:'#CC0033',w:1},{col:'#FF99BB',w:1}],
+    bg:'#070003', glow:'#FF4488', speed:0.7, geo_spd:0.65, geo_mode:'heart_bloom',
+    geo_c:['#FF4488','#FF6699','#FF2266','#FF88AA'], geo_bg:[7,0,3],
+    aff:["I am loved and I love deeply","My heart is open and free","Compassion flows from within","Love is my natural state"] },
+
+  { id:'dawn', name:'Dawn',                        tag:'Sleep · Mood · Rejuvenation',
+    palette:[{col:'#FF9966',w:3},{col:'#FF6633',w:1},{col:'#FFCC88',w:2},{col:'#FF7744',w:1},{col:'#FFB366',w:2},{col:'#FF5500',w:1},{col:'#100500',dark:true,w:1},{col:'#FFE0AA',w:2}],
+    bg:'#050200', glow:'#FF9966', speed:0.38, geo_spd:0.35, geo_mode:'sunrise',
+    geo_c:['#FF9966','#FFCC88','#FF7744','#FFB366'], geo_bg:[5,2,0],
+    aff:["Every day is a new beginning","I welcome the light","I am refreshed and renewed","Joy dawns within me"] },
+
+  { id:'bodymind', name:'Body & Mind',             tag:'Anti-Aging · Coherence',
+    palette:[{col:'#FFFFFF',w:2},{col:'#AACCFF',w:3},{col:'#88AAFF',w:2},{col:'#CCDEFF',w:2},{col:'#E8F0FF',w:2},{col:'#050510',dark:true,w:1},{col:'#6688CC',w:1},{col:'#FFFFFF',w:1}],
+    bg:'#000005', glow:'#AACCFF', speed:0.4, geo_spd:0.42, geo_mode:'metatron',
+    geo_c:['#FFFFFF','#AACCFF','#88AAFF','#CCDEFF'], geo_bg:[0,0,5],
+    aff:["Body and mind are one","I am in perfect harmony","Every cell is coherent","I am balanced and whole"] },
+
+  { id:'manifest', name:'Manifestation',           tag:'Balance · Clarity · Inflammation',
+    palette:[{col:'#00FFCC',w:3},{col:'#00AA88',w:1},{col:'#00FFAA',w:2},{col:'#007766',w:1},{col:'#66FFDD',w:2},{col:'#000A08',dark:true,w:1},{col:'#009977',w:1},{col:'#33FFCC',w:2}],
+    bg:'#000806', glow:'#00FFCC', speed:0.58, geo_spd:0.58, geo_mode:'sri_yantra',
+    geo_c:['#00FFCC','#00CCAA','#00FFAA','#66FFDD'], geo_bg:[0,7,5],
+    aff:["I create my reality","My intentions manifest now","I deserve all good things","The universe conspires for me"] },
+
+  { id:'lightning', name:'Lightning Dance',        tag:'Energy · Immunity · Stress',
+    palette:[{col:'#FFFF00',w:3},{col:'#FFFFFF',w:2},{col:'#FFEE00',w:2},{col:'#FFFF88',w:2},{col:'#CCCC00',w:1},{col:'#050500',dark:true,w:1},{col:'#FFFFAA',w:1},{col:'#888800',w:1}],
+    bg:'#020200', glow:'#FFFF44', speed:1.5, geo_spd:1.4, geo_mode:'plasma',
+    geo_c:['#FFFF00','#FFFFFF','#FFEE00','#FFFF88'], geo_bg:[1,1,0],
+    aff:["I am electric and alive","Power surges through me","I am resilient and strong","My immunity is radiant"] },
+
+  { id:'solar', name:'Solar Flare',               tag:'Regeneration · Calm · Collagen',
+    palette:[{col:'#FF6600',w:3},{col:'#FFB300',w:2},{col:'#FF4400',w:2},{col:'#FFCC00',w:2},{col:'#FF8800',w:2},{col:'#100300',dark:true,w:1},{col:'#FF5500',w:1},{col:'#FFD700',w:1}],
+    bg:'#060200', glow:'#FF8800', speed:0.8, geo_spd:0.78, geo_mode:'sunburst',
+    geo_c:['#FF6600','#FFB300','#FF4400','#FFCC00'], geo_bg:[6,2,0],
+    aff:["I am a solar being of light","Warmth heals every cell","I radiate love and power","My light illuminates all"] },
+
+  { id:'rainforest', name:'Rain Forest',           tag:'Detox · Stress · Serotonin',
+    palette:[{col:'#44FF66',w:3},{col:'#00CC55',w:2},{col:'#88FF44',w:2},{col:'#00FF88',w:2},{col:'#22CC44',w:1},{col:'#000A02',dark:true,w:1},{col:'#66FF44',w:1},{col:'#00AA33',w:1}],
+    bg:'#000a01', glow:'#44FF66', speed:0.6, geo_spd:0.52, geo_mode:'bio_organic',
+    geo_c:['#44FF66','#00CC55','#88FF44','#00FF88'], geo_bg:[0,8,1],
+    aff:["I am cleansed and renewed","Nature wisdom flows in me","I breathe deeply and freely","I am in harmony"] },
+
+  { id:'mystery', name:'Deep Mystery',             tag:'Regeneration · Circulation · Immune',
+    palette:[{col:'#0044FF',w:3},{col:'#0022CC',w:2},{col:'#0066FF',w:2},{col:'#4400AA',w:1},{col:'#0033EE',w:2},{col:'#000008',dark:true,w:1},{col:'#2200FF',w:1},{col:'#001188',w:1}],
+    bg:'#000004', glow:'#2200FF', speed:0.52, geo_spd:0.5, geo_mode:'cosmos_deep',
+    geo_c:['#0000CC','#0033FF','#4400AA','#0055FF'], geo_bg:[0,0,4],
+    aff:["I embrace the unknown","Infinite wisdom guides me","I dive into sacred depth","Mystery reveals its gifts"] },
+];
+
+// ════════════════════════════════════════════════════════
+// CANVAS
+// ════════════════════════════════════════════════════════
+const cv  = document.getElementById('c');
+const ctx = cv.getContext('2d');
+let W, H, CX, CY, R;
+
+function resize(){
+  W = cv.width  = window.innerWidth;
+  H = cv.height = window.innerHeight;
+  CX = W/2; CY = H/2; R = Math.min(W,H)*0.44;
+  initBands();
+}
+window.addEventListener('resize', resize);
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+let prog       = PROGRAMS[0];
+let displayMode= 'bands';     // 'bands' | 'geo'
+let autoMode   = true;        // auto-cycle on/off
+let autoTimer  = 0;
+const AUTO_DUR = 10000;       // 10 seconds per program
+let progIdx    = 0;
+let t          = 0;
+let scrollY    = 0;
+let affI       = 0;
+let affTimer   = 0;
+let lastNow    = 0;
+let menuOpen   = false;
+let bands      = [];
+let bolts      = [];
+let speedMult  = 1.0;         // global speed multiplier (0.25 – 4.0)
+const SPD_STEPS= [0.25,0.4,0.6,0.8,1.0,1.25,1.6,2.0,2.5,3.0,4.0];
+let spdIdx     = 4;           // default = 1.0x
+
+// ════════════════════════════════════════════════════════
+// COLOR HELPERS
+// ════════════════════════════════════════════════════════
+function hr(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
+function rgba(h,a){ const[r,g,b]=hr(h); return `rgba(${r},${g},${b},${a})`; }
+function rgb(h){ const[r,g,b]=hr(h); return `rgb(${r},${g},${b})`; }
+function lerp(a,b,u){ return a+(b-a)*u; }
+
+// ════════════════════════════════════════════════════════
+// ── BAND MODE SETUP ──
+// ════════════════════════════════════════════════════════
+const BAND_MIN_H=14, BAND_MAX_H=72;
+
+function buildPal(p){
+  const arr=[];
+  p.palette.forEach(e=>{ for(let i=0;i<e.w;i++) arr.push(e); });
+  return arr;
+}
+
+function initBands(){
+  bands=[];
+  const pal=buildPal(prog);
+  let y=0, row=0;
+  while(y < H + BAND_MAX_H*8){
+    const e=pal[row%pal.length];
+    const topFrac=Math.min(y/H,1);
+    const baseH=BAND_MIN_H+(BAND_MAX_H-BAND_MIN_H)*topFrac;
+    const h=baseH*(0.65+Math.random()*0.7);
+    const spd=(0.4+Math.random()*2.8)*(Math.random()<0.5?1:-1);
+    const phrase=TEXT_PHRASES[Math.floor(Math.random()*TEXT_PHRASES.length)];
+    const sc=Math.ceil(W/4)+10;
+    const ss=new Float32Array(sc);
+    for(let i=0;i<sc;i++) ss[i]=Math.random();
+    bands.push({y,h,e,spd,textOff:Math.random()*2000,phrase,ss,row});
+    y+=h; row++;
+  }
+}
+
+function drawBand(band, drawY){
+  const {h,e,spd,textOff,phrase,ss,row}=band;
+  const[r,g,b]=hr(e.col);
+
+  if(e.dark){
+    ctx.fillStyle=`rgb(${r},${g},${b})`;
+    ctx.fillRect(0,drawY,W,h);
+    if(h>10){ ctx.fillStyle=`rgba(${r+20},${g+20},${b+20},0.25)`; ctx.fillRect(0,drawY+h*.45,W,1); }
+    return;
+  }
+
+  ctx.fillStyle=`rgb(${r},${g},${b})`;
+  ctx.fillRect(0,drawY,W,h);
+
+  // shimmer
+  const step=4;
+  for(let x=0;x<W;x+=step){
+    const si=Math.floor(x/step)%ss.length;
+    const seed=ss[si];
+    const n=Math.sin(seed*12.3+t*3.1+x*.02)*.5+.5;
+    const n2=Math.sin(seed*7.7+t*1.8+x*.05)*.5+.5;
+    const v=(n*.6+n2*.4);
+    const al=v>0.65?(v-0.65)*1.8:-(0.65-v)*1.5;
+    ctx.fillStyle=al>0?`rgba(255,255,255,${Math.min(al*.32,.32)})`:`rgba(0,0,0,${Math.min(-al*.42,.42)})`;
+    ctx.fillRect(x,drawY,step,h);
+  }
+
+  // segment variation
+  const sw=40+Math.sin(row*5.3)*18;
+  for(let x=0;x<W;x+=sw){
+    const sa=Math.sin(x*.03+row+t*.4)*.07;
+    ctx.fillStyle=sa>0?`rgba(255,255,255,${sa})`:`rgba(0,0,0,${-sa})`;
+    ctx.fillRect(x,drawY,sw*.9,h);
+  }
+
+  // scrolling text
+  if(h>=16){
+    const fs=Math.max(8,Math.min(h*.52,14));
+    ctx.font=`${fs}px 'Share Tech Mono',monospace`;
+    ctx.textBaseline='middle';
+    const ty=drawY+h*.5;
+    const ta=0.55*(0.4+Math.sin(t*.5+row)*.12);
+    ctx.fillStyle=`rgba(255,255,255,${ta})`;
+    const off=(textOff+t*spd*60)%(W+1400);
+    const full=`  ${phrase}  ·  ${TEXT_PHRASES[(row+3)%TEXT_PHRASES.length]}  ·  ${phrase}  ·  `;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0,drawY,W,h); ctx.clip();
+    const tw=ctx.measureText(full).width;
+    let tx=-off%tw;
+    while(tx<W+tw){ ctx.fillText(full,tx,ty); tx+=tw; }
+    ctx.restore();
+  }
+
+  // edge lines
+  ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.fillRect(0,drawY,W,1);
+  ctx.fillStyle='rgba(0,0,0,0.38)';       ctx.fillRect(0,drawY+h-1,W,1);
+}
+
+function drawBands(){
+  const[br,bg,bb]=hr(prog.bg);
+  ctx.fillStyle=`rgb(${br},${bg},${bb})`; ctx.fillRect(0,0,W,H);
+
+  const totalH=bands.reduce((s,b)=>s+b.h,0);
+  const base=scrollY%totalH;
+  let cumY=-base;
+  for(let rep=0;rep<3;rep++){
+    for(let i=0;i<bands.length;i++){
+      const band=bands[i];
+      if(cumY+band.h>-10 && cumY<H+10) drawBand(band,cumY);
+      cumY+=band.h;
+    }
+  }
+
+  // scanlines
+  ctx.globalAlpha=0.06; ctx.fillStyle='#000';
+  for(let y=0;y<H;y+=2) ctx.fillRect(0,y,W,1);
+  ctx.globalAlpha=1;
+
+  // vignette
+  const vg=ctx.createRadialGradient(W/2,H/2,H*.18,W/2,H/2,H*.88);
+  vg.addColorStop(0,'transparent'); vg.addColorStop(1,'rgba(0,0,0,0.52)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+
+  // edge glow
+  const[gr,gg,gb]=hr(prog.glow);
+  const eg=0.07+Math.sin(t*.4)*.025;
+  const lg=ctx.createLinearGradient(0,0,W*.13,0);
+  lg.addColorStop(0,`rgba(${gr},${gg},${gb},${eg})`); lg.addColorStop(1,'transparent');
+  ctx.fillStyle=lg; ctx.fillRect(0,0,W,H);
+  const rg=ctx.createLinearGradient(W,0,W*.87,0);
+  rg.addColorStop(0,`rgba(${gr},${gg},${gb},${eg})`); rg.addColorStop(1,'transparent');
+  ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+}
+
+// ════════════════════════════════════════════════════════
+// ── GEO MODE — all sacred geometry animations ──
+// ════════════════════════════════════════════════════════
+
+// Use prog.geo_c and prog.geo_bg for geo mode colors
+function gc(){ return prog.geo_c; }
+function gbg(){ return prog.geo_bg; }
+
+function bloom(x,y,size,alpha){
+  ctx.globalCompositeOperation='screen';
+  const g=ctx.createRadialGradient(x,y,0,x,y,size);
+  g.addColorStop(0,rgba(prog.glow,alpha*2));
+  g.addColorStop(.45,rgba(prog.glow,alpha));
+  g.addColorStop(1,'transparent');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+}
+
+function trail(){
+  ctx.globalCompositeOperation='source-over';
+  const[r,g,b]=gbg();
+  ctx.fillStyle=`rgba(${r},${g},${b},0.13)`; ctx.fillRect(0,0,W,H);
+}
+
+function drawGeoBg(){
+  const[r,g,b]=gbg();
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle=`rgb(${r},${g},${b})`; ctx.fillRect(0,0,W,H);
+  const vg=ctx.createRadialGradient(CX,CY,R*.2,CX,CY,R*1.6);
+  vg.addColorStop(0,'transparent'); vg.addColorStop(1,'rgba(0,0,0,.5)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
+
+function photonicCollision(){
+  ctx.globalCompositeOperation='screen';
+  [[0,H/2],[W,H/2],[W/2,0],[W/2,H]].forEach(([ex,ey],i)=>{
+    const gr=ctx.createRadialGradient(ex,ey,0,ex,ey,W*.42);
+    gr.addColorStop(0,rgba(prog.glow,.07+Math.sin(t*.5+i)*.02));
+    gr.addColorStop(1,'transparent');
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+  });
+  bloom(CX,CY,R*.15,.14+Math.sin(t*.7)*.04);
+}
+
+// — Flower of Life —
+function drawFlowerOfLife(){
+  const r=R*.18, positions=[[0,0]];
+  for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;positions.push([Math.cos(a)*r*2,Math.sin(a)*r*2]);}
+  for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2,a2=((i+1)/6)*Math.PI*2;positions.push([Math.cos(a)*r*2+Math.cos(a2)*r*2,Math.sin(a)*r*2+Math.sin(a2)*r*2],[Math.cos(a)*r*4,Math.sin(a)*r*4]);}
+  ctx.globalCompositeOperation='screen';
+  const rot=t*.08;
+  positions.forEach(([px,py],i)=>{
+    const pulse=1+Math.sin(t*.9+i*.28)*.055;
+    const ox=CX+px*Math.cos(rot)-py*Math.sin(rot), oy=CY+px*Math.sin(rot)+py*Math.cos(rot);
+    const col=gc()[i%gc().length], a=.28+Math.sin(t*.6+i*.3)*.08;
+    ctx.beginPath(); ctx.arc(ox,oy,r*pulse,0,Math.PI*2);
+    ctx.strokeStyle=rgba(col,a); ctx.lineWidth=1.5; ctx.stroke();
+    const g2=ctx.createRadialGradient(ox,oy,0,ox,oy,r*pulse*.8);
+    g2.addColorStop(0,rgba(col,.07)); g2.addColorStop(1,'transparent');
+    ctx.fillStyle=g2; ctx.fill();
+  });
+  for(let ring=1;ring<=7;ring++){
+    const rr=R*(ring/7)*(1+Math.sin(t*.3+ring)*.02);
+    ctx.beginPath(); ctx.arc(CX,CY,rr,0,Math.PI*2);
+    ctx.strokeStyle=rgba(gc()[ring%gc().length],.07+Math.sin(t*.4+ring)*.03);
+    ctx.lineWidth=.8; ctx.stroke();
+  }
+  bloom(CX,CY,R*.5,.18+Math.sin(t*.4)*.04);
+}
+
+// — Vortex Fire —
+function drawVortexFire(){
+  ctx.globalCompositeOperation='screen';
+  for(let arm=0;arm<4;arm++){
+    const off=(arm/4)*Math.PI*2;
+    for(let i=0;i<140;i++){
+      const frac=i/140, a=frac*Math.PI*10+off+t*2.5, rr=frac*R;
+      const x=CX+Math.cos(a)*rr, y=CY+Math.sin(a)*rr;
+      const col=gc()[Math.floor(frac*gc().length)], sz=(1-frac)*9+1;
+      ctx.beginPath(); ctx.arc(x,y,sz*(0.7+Math.sin(t*1.2+i*.06)*.3),0,Math.PI*2);
+      ctx.fillStyle=rgba(col,(1-frac)*.6); ctx.fill();
+    }
+  }
+  bloom(CX,CY,R*.3,.3+Math.sin(t*1.5)*.1);
+}
+
+// — Mandala Bloom —
+function drawMandalaBloom(){
+  ctx.globalCompositeOperation='screen';
+  for(let layer=1;layer<=6;layer++){
+    const rr=R*(layer/6), rot=t*(layer%2===0?.15:-.15)+layer*.2;
+    for(let p=0;p<12;p++){
+      const a=(p/12)*Math.PI*2+rot;
+      const px=CX+Math.cos(a)*rr, py=CY+Math.sin(a)*rr;
+      const pr=rr*.18+Math.sin(t*.8+p*.5)*rr*.04;
+      const col=gc()[(layer+p)%gc().length];
+      ctx.beginPath(); ctx.arc(px,py,pr,0,Math.PI*2);
+      ctx.strokeStyle=rgba(col,.2+Math.sin(t+p*.3)*.08); ctx.lineWidth=1.2; ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(CX+Math.cos(a)*(rr-pr*1.2),CY+Math.sin(a)*(rr-pr*1.2));
+      ctx.lineTo(CX+Math.cos(a)*(rr+pr*1.2),CY+Math.sin(a)*(rr+pr*1.2));
+      ctx.strokeStyle=rgba(col,.08); ctx.lineWidth=.8; ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(CX,CY,rr*(1+Math.sin(t*.5+layer)*.015),0,Math.PI*2);
+    ctx.strokeStyle=rgba(gc()[layer%gc().length],.07); ctx.lineWidth=.7; ctx.stroke();
+  }
+  bloom(CX,CY,R*.45,.16);
+}
+
+// — Tree Rings —
+function drawTreeRings(){
+  ctx.globalCompositeOperation='screen';
+  for(let i=1;i<=14;i++){
+    const rr=R*(i/14)*(1+Math.sin(t*.3+i*.5)*.02);
+    ctx.beginPath();
+    for(let a=0;a<=Math.PI*2+.01;a+=.04){
+      const noise=Math.sin(a*6+t*.4+i)*.012*rr+Math.sin(a*11-t*.3+i*.7)*.007*rr;
+      const x=CX+Math.cos(a)*(rr+noise), y=CY+Math.sin(a)*(rr+noise);
+      a<.04?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle=rgba(gc()[i%gc().length],.18+Math.sin(t*.5+i)*.06); ctx.lineWidth=.9; ctx.stroke();
+  }
+  for(let s=0;s<12;s++){
+    const a=(s/12)*Math.PI*2+t*.05;
+    ctx.beginPath(); ctx.moveTo(CX,CY); ctx.lineTo(CX+Math.cos(a)*R,CY+Math.sin(a)*R);
+    ctx.strokeStyle=rgba(gc()[s%gc().length],.06); ctx.lineWidth=.7; ctx.stroke();
+  }
+  bloom(CX,CY,R*.4,.12);
+}
+
+// — Deep Wave —
+function drawDeepWave(){
+  ctx.globalCompositeOperation='screen';
+  for(let i=0;i<10;i++){
+    const frac=i/10, yBase=H*(.15+frac*.72), amp=H*(.04+frac*.03)*(1+Math.sin(t*.3+i)*.15);
+    const freq=.006+i*.0012, spd=(.4+i*.05)*(i%2===0?1:-1), col=gc()[i%gc().length];
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=4){
+      const y=yBase+Math.sin(x*freq+t*spd)*amp+Math.sin(x*freq*2.3-t*spd*.7)*amp*.35+Math.sin(x*freq*.5+t*spd*.4)*amp*.2;
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=rgba(col,.2+frac*.08); ctx.lineWidth=1.2+frac*.6; ctx.stroke();
+    ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+    ctx.fillStyle=rgba(col,.025+frac*.01); ctx.fill();
+  }
+  const sg=ctx.createRadialGradient(CX,H*.3,0,CX,H*.3,H*.5);
+  sg.addColorStop(0,rgba(prog.glow,.12)); sg.addColorStop(1,'transparent');
+  ctx.fillStyle=sg; ctx.fillRect(0,0,W,H);
+}
+
+// — Merkaba —
+function drawMerkabaSpin(){
+  ctx.globalCompositeOperation='screen';
+  for(let l=1;l<=5;l++){
+    const rr=R*(l/5), rot1=t*.4*(l%2===0?1:-1), rot2=rot1+Math.PI;
+    const a=.3+Math.sin(t*.5+l)*.08;
+    ctx.beginPath();
+    for(let v=0;v<3;v++){const ang=rot1+(v/3)*Math.PI*2-Math.PI/2;v===0?ctx.moveTo(CX+Math.cos(ang)*rr,CY+Math.sin(ang)*rr):ctx.lineTo(CX+Math.cos(ang)*rr,CY+Math.sin(ang)*rr);}
+    ctx.closePath(); ctx.strokeStyle=rgba(gc()[0],a/l); ctx.lineWidth=1.2; ctx.stroke();
+    ctx.beginPath();
+    for(let v=0;v<3;v++){const ang=rot2+(v/3)*Math.PI*2-Math.PI/2;v===0?ctx.moveTo(CX+Math.cos(ang)*rr,CY+Math.sin(ang)*rr):ctx.lineTo(CX+Math.cos(ang)*rr,CY+Math.sin(ang)*rr);}
+    ctx.closePath(); ctx.strokeStyle=rgba(gc()[1],a/l); ctx.lineWidth=1.2; ctx.stroke();
+  }
+  for(let r=1;r<=5;r++){
+    ctx.beginPath(); ctx.arc(CX,CY,R*(r/5)+Math.sin(t*1.2+r)*4,0,Math.PI*2);
+    ctx.strokeStyle=rgba(gc()[r%gc().length],.08+Math.sin(t+r)*.03); ctx.lineWidth=.7; ctx.stroke();
+  }
+  bloom(CX,CY,R*.35,.3+Math.sin(t*.8)*.1);
+}
+
+// — Sacred Spiral —
+function drawSacredSpiral(){
+  ctx.globalCompositeOperation='screen';
+  for(let arm=0;arm<6;arm++){
+    const off=(arm/6)*Math.PI*2;
+    for(let i=0;i<120;i++){
+      const frac=i/120, a=frac*Math.PI*8+off+t*.9, rr=frac*R*(1+Math.sin(t*.4)*.04);
+      const x=CX+Math.cos(a)*rr, y=CY+Math.sin(a)*rr, col=gc()[arm%gc().length];
+      ctx.beginPath(); ctx.arc(x,y,(1-frac)*7+1.2,0,Math.PI*2);
+      ctx.fillStyle=rgba(col,(1-frac)*.55); ctx.fill();
+    }
+  }
+  bloom(CX,CY,R*.3,.2+Math.sin(t*.6)*.06);
+}
+
+// — Pulse Rings —
+function drawPulseRings(){
+  ctx.globalCompositeOperation='screen';
+  for(let i=0;i<10;i++){
+    const phase=((t*1.8+i*(1/10)*Math.PI*2)%(Math.PI*2));
+    const frac=phase/(Math.PI*2), rr=frac*R, a=Math.max(0,(1-frac))*.65;
+    ctx.beginPath(); ctx.arc(CX,CY,rr,0,Math.PI*2);
+    ctx.strokeStyle=rgba(gc()[i%gc().length],a); ctx.lineWidth=3+frac*2; ctx.stroke();
+  }
+  const beat=Math.max(0,Math.sin(t*6));
+  bloom(CX,CY,R*.25,.5*beat+.1);
+}
+
+// — Metatron —
+function drawMetatron(){
+  ctx.globalCompositeOperation='screen';
+  const rr=R*.35, rot=t*.04;
+  const ctrs=[[0,0]];
+  for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2+rot;ctrs.push([Math.cos(a)*rr,Math.sin(a)*rr]);}
+  for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2+rot;ctrs.push([Math.cos(a)*rr*2,Math.sin(a)*rr*2]);}
+  ctrs.forEach(([px,py],i)=>{
+    ctx.beginPath(); ctx.arc(CX+px,CY+py,rr*(1+Math.sin(t*.7+i*.3)*.03),0,Math.PI*2);
+    ctx.strokeStyle=rgba(gc()[i%gc().length],.18+Math.sin(t*.5+i*.25)*.06); ctx.lineWidth=.9; ctx.stroke();
+  });
+  ctx.globalAlpha=.07;
+  for(let i=0;i<ctrs.length;i++) for(let j=i+1;j<ctrs.length;j++){
+    ctx.beginPath(); ctx.moveTo(CX+ctrs[i][0],CY+ctrs[i][1]); ctx.lineTo(CX+ctrs[j][0],CY+ctrs[j][1]);
+    ctx.strokeStyle=rgb(gc()[0]); ctx.lineWidth=.5; ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  bloom(CX,CY,R*.4,.15+Math.sin(t*.3)*.04);
+}
+
+// — Plasma —
+function spawnBolt(){
+  const x1=Math.random()*W, x2=CX+(Math.random()-.5)*R;
+  bolts.push({x1,y1:0,x2,y2:H,life:1,col:gc()[Math.floor(Math.random()*gc().length)]});
+}
+function drawPlasma(){
+  ctx.globalCompositeOperation='screen';
+  if(Math.random()<.08) spawnBolt();
+  bolts=bolts.filter(b=>{
+    b.life-=.06; if(b.life<=0) return false;
+    function bolt(x1,y1,x2,y2,d){
+      if(d<=0||Math.abs(x2-x1)+Math.abs(y2-y1)<8){
+        ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+        ctx.strokeStyle=rgba(b.col,b.life*.8); ctx.lineWidth=d===0?.5:1.5; ctx.stroke(); return;
+      }
+      const mx=(x1+x2)/2+(Math.random()-.5)*60, my=(y1+y2)/2+(Math.random()-.5)*60;
+      bolt(x1,y1,mx,my,d-1); bolt(mx,my,x2,y2,d-1);
+    }
+    bolt(b.x1,b.y1,b.x2,b.y2,4); return true;
+  });
+  for(let i=0;i<5;i++){
+    const ox=CX+Math.sin(t*1.1+i*1.3)*W*.3, oy=CY+Math.cos(t*.9+i*.8)*H*.3;
+    const gg=ctx.createRadialGradient(ox,oy,0,ox,oy,80);
+    gg.addColorStop(0,rgba(prog.glow,.15*Math.abs(Math.sin(t*2+i))+.08)); gg.addColorStop(1,'transparent');
+    ctx.fillStyle=gg; ctx.fillRect(0,0,W,H);
+  }
+}
+
+// — Sunrise —
+function drawSunrise(){
+  ctx.globalCompositeOperation='screen';
+  const hy=H*.62, sy=hy+Math.sin(t*.2)*H*.05;
+  const sg=ctx.createLinearGradient(0,hy-H*.3,0,hy+H*.1);
+  sg.addColorStop(0,'transparent'); sg.addColorStop(.5,rgba(gc()[0],.25)); sg.addColorStop(1,rgba(gc()[1],.35));
+  ctx.fillStyle=sg; ctx.fillRect(0,0,W,H);
+  bloom(CX,sy,R*.3,.5+Math.sin(t*.4)*.08);
+  for(let s=0;s<24;s++){
+    const a=(s/24)*Math.PI*2+t*.07, len=R*(.4+Math.sin(t*.5+s*.4)*.15);
+    ctx.beginPath(); ctx.moveTo(CX+Math.cos(a)*R*.08,sy+Math.sin(a)*R*.08);
+    ctx.lineTo(CX+Math.cos(a)*len,sy+Math.sin(a)*len);
+    ctx.strokeStyle=rgba(gc()[s%gc().length],.06+Math.sin(t*.6+s)*.03);
+    ctx.lineWidth=2.5+Math.sin(t+s)*1; ctx.stroke();
+  }
+  for(let r=1;r<=6;r++){
+    ctx.beginPath(); ctx.arc(CX,sy,R*(r/6)+Math.sin(t*.4+r)*5,0,Math.PI*2);
+    ctx.strokeStyle=rgba(gc()[r%gc().length],.06); ctx.lineWidth=.7; ctx.stroke();
+  }
+}
+
+// — Sri Yantra —
+function drawSriYantra(){
+  ctx.globalCompositeOperation='screen';
+  function tri(scale,rotOff,col,alpha,up){
+    ctx.beginPath();
+    for(let v=0;v<3;v++){
+      const a=rotOff+(v/3)*Math.PI*2+(up?-Math.PI/2:Math.PI/2);
+      const x=CX+Math.cos(a)*R*scale, y=CY+Math.sin(a)*R*scale;
+      v===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath(); ctx.strokeStyle=rgba(col,alpha); ctx.lineWidth=1.3; ctx.stroke();
+  }
+  const rot=t*.06;
+  [[.28,.34,.40,.46,.52],[.22,.28,.34,.40,.46]].forEach((scales,set)=>{
+    scales.forEach((s,i)=>tri(s,rot*(set===0?1:-1),gc()[(set*2+i)%gc().length],.4-.04*i,set===0));
+  });
+  bloom(CX,CY,R*.08,.8);
+  for(let r=1;r<=3;r++){
+    ctx.beginPath(); ctx.arc(CX,CY,R*(r/3)+Math.sin(t*.3+r)*3,0,Math.PI*2);
+    ctx.strokeStyle=rgba(gc()[r%gc().length],.1); ctx.lineWidth=.8; ctx.stroke();
+  }
+}
+
+// — Sunburst —
+function drawSunburst(){
+  ctx.globalCompositeOperation='screen';
+  for(let r=0;r<48;r++){
+    const a=(r/48)*Math.PI*2+t*.18, len=R*(.5+Math.sin(t*.7+r*.5)*.35), w=(Math.PI/48)*(.4+Math.sin(t*.4+r*.3)*.3);
+    ctx.beginPath(); ctx.moveTo(CX,CY); ctx.arc(CX,CY,len,a-w,a+w); ctx.closePath();
+    ctx.fillStyle=rgba(gc()[r%gc().length],.035+Math.sin(t*.5+r)*.015); ctx.fill();
+  }
+  bloom(CX,CY,R*.55,.5+Math.sin(t*.4)*.08);
+  bloom(CX,CY,R*.2,1);
+}
+
+// — Bio Organic —
+function drawBioOrganic(){
+  ctx.globalCompositeOperation='screen';
+  for(let i=0;i<16;i++){
+    const ox=CX+Math.sin(t*.25+i*1.05)*.36*W, oy=CY+Math.cos(t*.22+i*.88)*.36*H;
+    const rr=R*(.04+i*.018)*(1+Math.sin(t+i*.4)*.12);
+    ctx.beginPath(); ctx.arc(ox,oy,rr,0,Math.PI*2);
+    ctx.strokeStyle=rgba(gc()[i%gc().length],.22+Math.sin(t*.6+i)*.08); ctx.lineWidth=1.1; ctx.stroke();
+    const gg=ctx.createRadialGradient(ox,oy,0,ox,oy,rr);
+    gg.addColorStop(0,rgba(gc()[i%gc().length],.06)); gg.addColorStop(1,'transparent');
+    ctx.fillStyle=gg; ctx.fill();
+  }
+  bloom(CX,CY,R*.35,.1);
+}
+
+// — Heart Bloom —
+function drawHeartBloom(){
+  ctx.globalCompositeOperation='screen';
+  const sc=R*.028;
+  for(let layer=1;layer<=8;layer++){
+    const s=sc*layer*(1+Math.sin(t*1.3)*.04);
+    ctx.beginPath();
+    for(let a=0;a<=Math.PI*2;a+=.02){
+      const ang=a-Math.PI/2;
+      const x=CX+s*(16*Math.pow(Math.sin(ang),3));
+      const y=CY-s*(13*Math.cos(ang)-5*Math.cos(2*ang)-2*Math.cos(3*ang)-Math.cos(4*ang));
+      a<.02?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle=rgba(gc()[layer%gc().length],.35-.03*layer); ctx.lineWidth=1.5; ctx.stroke();
+  }
+  bloom(CX,CY,R*.3,.25+Math.sin(t*1.3)*.1);
+}
+
+// — Cosmos Deep —
+function drawCosmos(){
+  ctx.globalCompositeOperation='screen';
+  for(let i=0;i<400;i++){
+    const px=(Math.sin(i*2.39)*.5+.5)*W, py=(Math.cos(i*1.73)*.5+.5)*H;
+    const blink=Math.max(0,.15+Math.sin(t*1.3+i*.4)*.2);
+    ctx.beginPath(); ctx.arc(px,py,.8+Math.sin(i)*.5,0,Math.PI*2);
+    ctx.fillStyle=rgba(gc()[i%gc().length],blink); ctx.fill();
+  }
+  for(let c=0;c<5;c++){
+    const nx=CX+Math.sin(t*.12+c*1.26)*.4*W, ny=CY+Math.cos(t*.1+c*1.05)*.4*H;
+    const gg=ctx.createRadialGradient(nx,ny,0,nx,ny,R*.28);
+    gg.addColorStop(0,rgba(gc()[c%gc().length],.1)); gg.addColorStop(1,'transparent');
+    ctx.fillStyle=gg; ctx.fillRect(0,0,W,H);
+  }
+  bloom(CX,CY,R*.55,.4+Math.sin(t*.3)*.08);
+  for(let r=1;r<=4;r++){
+    ctx.beginPath(); ctx.arc(CX,CY,R*(.08+r*.06)+Math.sin(t*.7+r)*4,0,Math.PI*2);
+    ctx.strokeStyle=rgba(gc()[r%gc().length],.2+Math.sin(t+r)*.07); ctx.lineWidth=1; ctx.stroke();
+  }
+}
+
+function drawGeo(){
+  drawGeoBg(); trail();
+  switch(prog.geo_mode){
+    case 'flower_life':   drawFlowerOfLife();  break;
+    case 'vortex_fire':   drawVortexFire();    break;
+    case 'mandala_bloom': drawMandalaBloom();  break;
+    case 'tree_rings':    drawTreeRings();     break;
+    case 'deep_wave':     drawDeepWave();      break;
+    case 'merkaba_spin':  drawMerkabaSpin();   break;
+    case 'sacred_spiral': drawSacredSpiral();  break;
+    case 'pulse_rings':   drawPulseRings();    break;
+    case 'metatron':      drawMetatron();      break;
+    case 'plasma':        drawPlasma();        break;
+    case 'sunrise':       drawSunrise();       break;
+    case 'sri_yantra':    drawSriYantra();     break;
+    case 'sunburst':      drawSunburst();      break;
+    case 'bio_organic':   drawBioOrganic();    break;
+    case 'heart_bloom':   drawHeartBloom();    break;
+    case 'cosmos_deep':   drawCosmos();        break;
+  }
+  photonicCollision();
+  ctx.globalCompositeOperation='source-over';
+}
+
+// ════════════════════════════════════════════════════════
+// RENDER LOOP
+// ════════════════════════════════════════════════════════
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt=Math.min((now-lastNow)/1000,.05);
+  lastNow=now;
+
+  const spd = (displayMode==='geo' ? prog.geo_spd : prog.speed) * speedMult;
+  t      += dt * spd;
+  scrollY += dt * spd * 18;
+
+  // affirmation
+  affTimer+=dt*1000;
+  if(affTimer>=9000){
+    affTimer=0; affI=(affI+1)%prog.aff.length;
+    const el=document.getElementById('affirmation');
+    el.style.opacity=0;
+    setTimeout(()=>{ el.textContent=prog.aff[affI]; el.style.opacity=1; },1600);
+  }
+
+  // auto-cycle
+  if(autoMode && !menuOpen){
+    autoTimer+=dt*1000;
+    const pct=autoTimer/AUTO_DUR;
+    document.getElementById('timer-bar').style.width=(pct*100)+'%';
+    if(autoTimer>=AUTO_DUR){
+      autoTimer=0;
+      progIdx=(progIdx+1)%PROGRAMS.length;
+      setProgram(PROGRAMS[progIdx], false); // false = don't reset autoMode
+    }
+  }
+
+  // draw
+  if(displayMode==='bands') drawBands();
+  else drawGeo();
+}
+
+// ════════════════════════════════════════════════════════
+// SET PROGRAM
+// ════════════════════════════════════════════════════════
+function flashTransition(cb){
+  const fl=document.getElementById('flash');
+  fl.style.transition='opacity .12s';
+  fl.style.opacity=0.15;
+  setTimeout(()=>{ fl.style.opacity=0; cb(); },120);
+}
+
+function setProgram(p, stopAuto=true){
+  flashTransition(()=>{
+    prog=p; t=0; scrollY=0; affI=0; affTimer=0; bolts=[];
+    if(displayMode==='bands') initBands();
+    progIdx=PROGRAMS.indexOf(p);
+
+    if(stopAuto){
+      autoMode=false; autoTimer=0;
+      document.getElementById('timer-bar').style.width='0%';
+      document.getElementById('auto-dot').classList.add('off');
+      document.getElementById('auto-text').textContent='Manual';
+    }
+
+    const pl=document.getElementById('prog-label');
+    const pt=document.getElementById('prog-tag-el');
+    const af=document.getElementById('affirmation');
+    pl.textContent=p.name; pl.classList.remove('show');
+    pt.textContent=p.tag;  pt.classList.remove('show');
+    af.style.opacity=0;
+    setTimeout(()=>{ pl.classList.add('show'); pt.classList.add('show'); },50);
+    setTimeout(()=>{ pl.classList.remove('show'); pt.classList.remove('show'); },5000);
+    setTimeout(()=>{ af.textContent=p.aff[0]; af.style.opacity=1; },500);
+
+    document.querySelectorAll('.pcard,.gcard').forEach(c=>c.classList.remove('on'));
+    document.querySelectorAll(`[data-id="${p.id}"]`).forEach(c=>c.classList.add('on'));
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// SPEED CONTROL
+// ════════════════════════════════════════════════════════
+let spdHudTimer = null;
+
+function flashSpdHud(){
+  const el = document.getElementById('spd-hud');
+  const val = SPD_STEPS[spdIdx];
+  el.textContent = val===1.0 ? '● Normal Speed' : val<1 ? '▼ '+val+'× Slow' : '▲ '+val+'× Fast';
+  el.classList.add('show');
+  clearTimeout(spdHudTimer);
+  spdHudTimer = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+function updateSpeedUI(){
+  const label = document.getElementById('spd-label');
+  const val = SPD_STEPS[spdIdx];
+  label.textContent = val===1.0 ? 'Normal' : val<1 ? 'Slow ×'+val : 'Fast ×'+val;
+}
+
+function speedUp(){
+  if(spdIdx < SPD_STEPS.length-1){ spdIdx++; speedMult=SPD_STEPS[spdIdx]; updateSpeedUI(); flashSpdHud(); }
+}
+function speedDown(){
+  if(spdIdx > 0){ spdIdx--; speedMult=SPD_STEPS[spdIdx]; updateSpeedUI(); flashSpdHud(); }
+}
+
+document.getElementById('spd-up').addEventListener('click', speedUp);
+document.getElementById('spd-dn').addEventListener('click', speedDown);
+
+// ════════════════════════════════════════════════════════
+// AUTO BADGE TOGGLE
+// ════════════════════════════════════════════════════════
+document.getElementById('auto-badge').addEventListener('click',()=>{
+  autoMode=!autoMode; autoTimer=0;
+  const dot=document.getElementById('auto-dot');
+  const txt=document.getElementById('auto-text');
+  const bar=document.getElementById('timer-bar');
+  if(autoMode){ dot.classList.remove('off'); txt.textContent='Auto'; bar.classList.remove('paused'); }
+  else { dot.classList.add('off'); txt.textContent='Manual'; bar.style.width='0%'; bar.classList.add('paused'); }
+});
+
+// ════════════════════════════════════════════════════════
+// MODE TOGGLE
+// ════════════════════════════════════════════════════════
+const modeToggleBtn=document.getElementById('mode-toggle');
+modeToggleBtn.addEventListener('click',()=>{
+  displayMode = displayMode==='bands' ? 'geo' : 'bands';
+  if(displayMode==='bands'){ modeToggleBtn.textContent='⬡ Bands'; modeToggleBtn.classList.remove('geo'); }
+  else { modeToggleBtn.textContent='✦ Geometry'; modeToggleBtn.classList.add('geo'); }
+  t=0; bolts=[];
+  if(displayMode==='bands') initBands();
+});
+
+// ════════════════════════════════════════════════════════
+// MENU
+// ════════════════════════════════════════════════════════
+const menuEl=document.getElementById('menu');
+
+// Build band cards
+const pgrid=document.getElementById('pgrid');
+PROGRAMS.forEach(p=>{
+  const c=document.createElement('div');
+  c.className='pcard'; c.dataset.id=p.id;
+  const sw=p.palette.slice(0,4).filter(e=>!e.dark).map(e=>e.col);
+  c.innerHTML=`<div class="sw" style="background:linear-gradient(to right,${sw.join(',')})"></div>
+               <div class="pn">${p.name}</div><div class="pt">${p.tag}</div>`;
+  c.addEventListener('click',()=>{ setProgram(p); closeMenu(); });
+  pgrid.appendChild(c);
+});
+
+// Build geo cards
+const ggrid=document.getElementById('ggrid');
+PROGRAMS.forEach(p=>{
+  const c=document.createElement('div');
+  c.className='gcard'; c.dataset.id=p.id;
+  const grad=`radial-gradient(circle at 40% 40%,${p.geo_c[0]},${p.geo_c[p.geo_c.length-1]})`;
+  c.innerHTML=`<div class="dot" style="background:${grad}"></div>
+               <div class="gn">${p.name}</div><div class="gt">${p.geo_mode.replace(/_/g,' ')}</div>`;
+  c.addEventListener('click',()=>{
+    displayMode='geo';
+    modeToggleBtn.textContent='✦ Geometry'; modeToggleBtn.classList.add('geo');
+    t=0; bolts=[];
+    setProgram(p); closeMenu();
+  });
+  ggrid.appendChild(c);
+});
+
+// Mark first active
+document.querySelectorAll('[data-id="peles_fire"]').forEach(c=>c.classList.add('on'));
+
+// Tabs
+document.getElementById('tab-bands').addEventListener('click',()=>{
+  document.getElementById('tab-bands').classList.add('active');
+  document.getElementById('tab-geo').classList.remove('active');
+  document.getElementById('section-bands').classList.add('visible');
+  document.getElementById('section-geo').classList.remove('visible');
+});
+document.getElementById('tab-geo').addEventListener('click',()=>{
+  document.getElementById('tab-geo').classList.add('active');
+  document.getElementById('tab-bands').classList.remove('active');
+  document.getElementById('section-geo').classList.add('visible');
+  document.getElementById('section-bands').classList.remove('visible');
+});
+
+function openMenu(){ menuOpen=true; menuEl.classList.add('open'); }
+function closeMenu(){ menuOpen=false; menuEl.classList.remove('open'); }
+document.getElementById('menu-btn').addEventListener('click', openMenu);
+document.getElementById('close-btn').addEventListener('click', closeMenu);
+menuEl.addEventListener('click',e=>{ if(e.target===menuEl) closeMenu(); });
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeMenu();
+  if(e.key==='m'||e.key==='M') menuOpen?closeMenu():openMenu();
+  if(e.key==='f'||e.key==='F') document.documentElement.requestFullscreen?.();
+  if(e.key==='g'||e.key==='G'){ modeToggleBtn.click(); }
+  if(e.key==='a'||e.key==='A') document.getElementById('auto-badge').click();
+  if(e.key==='ArrowUp')   { e.preventDefault(); speedUp(); }
+  if(e.key==='ArrowDown') { e.preventDefault(); speedDown(); }
+  const idx=PROGRAMS.indexOf(prog);
+  if(e.key==='ArrowRight'){ progIdx=(idx+1)%PROGRAMS.length; setProgram(PROGRAMS[progIdx]); }
+  if(e.key==='ArrowLeft'){  progIdx=(idx-1+PROGRAMS.length)%PROGRAMS.length; setProgram(PROGRAMS[progIdx]); }
+});
+
+// ════════════════════════════════════════════════════════
+// SPLASH
+// ════════════════════════════════════════════════════════
+function startExperience(){
+  document.getElementById('splash').style.display='none';
+  // Start auto-cycle from first program
+  autoMode=true; autoTimer=0;
+  document.getElementById('auto-dot').classList.remove('off');
+  document.getElementById('auto-text').textContent='Auto';
+  updateSpeedUI();
+  setProgram(PROGRAMS[0], false);
+}
+document.getElementById('fs-go').addEventListener('click',()=>{
+  document.documentElement.requestFullscreen?.().catch(()=>{});
+  startExperience();
+});
+document.getElementById('win-go').addEventListener('click', startExperience);
+
+// ════════════════════════════════════════════════════════
+// GO
+// ════════════════════════════════════════════════════════
+resize();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
